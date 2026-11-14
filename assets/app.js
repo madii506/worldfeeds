@@ -173,12 +173,12 @@
       const rot = eout(clamp((t - 250) / 3750, 0, 1)); G.set(lerp(lonStart, lonEnd, rot), lerp(latStart, latEnd, rot));
       // the sun comes up: a day of light sweeps the globe, then the sky dawns from ink to paper
       const sw = clamp((t - SWEEP0) / SWEEP, 0, 1), swe = eio(sw); S.sunT = sw < 1 ? Date.now() - (1 - swe) * 13 * 3600e3 : null; const sun = sunNow();
-      const dawn = eio(clamp((t - SWEEP0 - 500) / 750, 0, 1)), dk = dawn < .5;
+      const dk = false;
       const hp = eio(clamp((t - HAND) / HLEN, 0, 1)), F = hp > 0 ? final() : big, zoom = lerp(.9, 1, eout(clamp(t / 2600, 0, 1))), P = { x: lerp(big.x, F.x, hp), y: lerp(big.y, F.y, hp), k: lerp(big.k * zoom, F.k, hp) };
       if (hp > 0 && !handed) { handed = true; html.classList.remove('intro'); $('.hero').classList.add('go'); if (vw < 700) { released = true; G.hold(false, true); } }
       const am = released ? 1 - hp : 1, ink = c => dk ? (DARK[c] || c) : c;
       const T = (gx, gy) => [P.x + (gx - geo.size / 2) * P.k, P.y + (gy - geo.size / 2) * P.k]; T.k = P.k;
-      const sky = mix('#151513', '#f6f3ec', dawn);
+      const sky = [246, 243, 236];
       x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, vw, vh); el.style.backgroundColor = `rgba(${sky[0]},${sky[1]},${sky[2]},${1 - hp})`;
       x.textBaseline = 'alphabetic'; const fA = `600 ${geo.fs * P.k}px JB, ui-monospace, monospace`; const fade = clamp(t / 500, 0, 1);
       // the orbit ring and its satellite: back half behind the Earth, front half over it
@@ -197,14 +197,14 @@
       x.font = fA;
       for (const p of parts) { const k = p.k, [tx, ty] = T(k.gx, k.gy), fp = clamp((t - p.go) / 760, 0, 1);
         if (fp < 1) { const e = eio(fp), px = lerp(p.sx + Math.sin(t / 900 + k.h * 9) * 5, tx, e), py = lerp(p.sy + Math.cos(t / 1000 + k.h * 7) * 5, ty, e);
-          if (e < .02) { const tw = .25 + .75 * Math.abs(Math.sin(t / (300 + p.tw * 500) + p.tw * 20)); x.globalAlpha = tw * fade * (p.tw > .9 ? .95 : .55); x.fillStyle = p.tw > .93 ? '#ffd2bf' : '#e9e4d8'; x.fillText(p.tw > .9 ? '*' : p.tw > .6 ? '+' : '.', px, py); continue; }
+          if (e < .02) { const tw = .25 + .75 * Math.abs(Math.sin(t / (300 + p.tw * 500) + p.tw * 20)); x.globalAlpha = tw * fade * (p.tw > .9 ? .95 : .55); x.fillStyle = p.tw > .93 ? C.o : p.tw > .6 ? C.b : C.g; x.fillText(p.tw > .9 ? '*' : p.tw > .6 ? '+' : '.', px, py); continue; }
           x.globalAlpha = (.4 + .5 * e) * fade; x.fillStyle = ink(k.h > .86 ? C.o : k.h > .45 ? C.b : C.g); x.fillText(DUST[Math.floor(hash(k.c, k.r + Math.floor(t / 60)) * 14)], px, py); continue; }
         const L = G.look(k, sun); if (!L) continue; const fl = t - p.go - 760;
         if (fl < 240) { x.globalAlpha = (1 - fl / 480) * am; x.fillStyle = C.o; x.fillText(L[0] === '.' ? ':' : L[0], tx, ty); continue; }
         x.globalAlpha = L[2] * am * (dk ? 1.15 : 1); x.fillStyle = ink(L[1]); x.fillText(L[0], tx, ty); }
       // city lights: the 48 tape cities glow on the night side until the sun reaches them
       if (t > 1500) { const ca = clamp((t - 1500) / 500, 0, 1) * (1 - hp); for (const m of MEALS) { const [vx, vy, vz] = G.toView(m.lat, m.lon); if (vz < .1 || sunAlt(m.lat, m.lon, sun) > -.02) continue;
-          const [X, Y] = T(geo.size / 2 + vx * geo.R, geo.size / 2 - vy * geo.R), tw = .6 + .4 * Math.sin(t / 240 + m.lat); x.globalAlpha = ca * tw * am; x.fillStyle = '#ffb27a'; x.beginPath(); x.arc(X, Y, 1.9 * P.k + .6, 0, 6.283); x.fill(); x.globalAlpha = ca * tw * .25 * am; x.beginPath(); x.arc(X, Y, 5 * P.k, 0, 6.283); x.fill(); } }
+          const [X, Y] = T(geo.size / 2 + vx * geo.R, geo.size / 2 - vy * geo.R), tw = .6 + .4 * Math.sin(t / 240 + m.lat); x.globalAlpha = ca * tw * am; x.fillStyle = C.o; x.beginPath(); x.arc(X, Y, 1.9 * P.k + .6, 0, 6.283); x.fill(); x.globalAlpha = ca * tw * .25 * am; x.beginPath(); x.arc(X, Y, 5 * P.k, 0, 6.283); x.fill(); } }
       ring(true);
       if (t > 3300) G.drawMarkers(x, now, T, (i, e) => clamp((t - 3300 - (LW[e.level] > 1 ? 0 : 220) - i * 8) / 260, 0, 1) * am);
       x.globalAlpha = 1; bar.style.width = (clamp(t / END, 0, 1) * 100) + '%'; bar.style.opacity = 1 - hp;

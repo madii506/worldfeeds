@@ -11,10 +11,10 @@
 <meta property="og:image" content="https://world-feeds.vercel.app/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://world-feeds.vercel.app/og.png">
-<link rel="icon" href="/favicon.ico?v=469172" sizes="any">
-<link rel="icon" href="/favicon-32.png?v=469172" type="image/png" sizes="32x32">
-<link rel="icon" href="/icon-512.png?v=469172" type="image/png" sizes="512x512">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=469172">
+<link rel="icon" href="/favicon.ico?v=469202" sizes="any">
+<link rel="icon" href="/favicon-32.png?v=469202" type="image/png" sizes="32x32">
+<link rel="icon" href="/icon-512.png?v=469202" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=469202">
 <link rel="preload" href="/assets/fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/JB.woff2" as="font" type="font/woff2" crossorigin>
 <style>
@@ -346,6 +346,34 @@ html.intro #globeCv{visibility:hidden}
 .sheet a{font-family:var(--serif);font-size:26px;letter-spacing:-.01em;text-decoration:none;padding:10px 0;border-bottom:1px solid var(--line)}
 .sheet a span{font-family:var(--mono);font-size:12px;color:var(--o2);margin-right:14px;vertical-align:4px}
 
+/* ---- round 2 motion */
+.ca{display:inline-flex;align-items:center;gap:10px;margin-top:22px;border:1px solid var(--ink);border-radius:999px;padding:6px 6px 6px 14px;max-width:100%;background:#fbf9f4}
+.ca .k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--o2)}
+.ca code{font-family:var(--mono);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ca button{font-family:var(--mono);font-size:12px;border:0;border-radius:999px;background:var(--ink);color:var(--paper);padding:8px 14px;cursor:pointer;min-height:34px}
+.bignum{position:absolute;right:var(--gut);top:40px;font-family:var(--serif);font-weight:300;font-variation-settings:"opsz" 144;font-size:clamp(140px,22vw,340px);line-height:.8;letter-spacing:-.06em;color:transparent;-webkit-text-stroke:1px var(--line2);pointer-events:none;user-select:none;z-index:0;will-change:transform}
+.plate>.wrap,.plate>.map{position:relative;z-index:1}
+.plate{overflow:clip}
+.rule .big .sw{color:#c4bcab;transition:color .35s ease}
+.rule .big .sw.on{color:var(--ink)}
+.rule .big em .sw.on{color:var(--o)}
+.eyebrow .tx{display:inline-block;min-width:1ch}
+@keyframes hit{0%{transform:scale(1.22);background:var(--o);border-color:var(--o);color:#fff;box-shadow:0 0 0 6px rgba(255,90,31,.18)}30%{transform:scale(1);background:var(--paper);border-color:var(--ink);color:var(--ink);box-shadow:0 0 0 0 rgba(255,90,31,0)}100%{transform:scale(1)}}
+@keyframes hitL{0%{box-shadow:0 0 0 0 rgba(255,90,31,.55)}60%{box-shadow:0 0 0 14px rgba(255,90,31,0)}100%{box-shadow:0 0 0 0 rgba(255,90,31,0)}}
+.plate.vis .route .node .dot{animation:hit 1.75s linear infinite}
+.plate.vis .route .node:nth-child(2) .dot{animation-delay:0s}
+.plate.vis .route .node:nth-child(3) .dot{animation-delay:1.22s}
+.plate.vis .route .node:nth-child(4) .dot{animation-delay:.99s}
+.plate.vis .route .node:nth-child(5) .dot{animation-delay:.76s}
+.plate.vis .route .node:nth-child(6) .dot{animation:hitL 1.75s ease-out infinite;animation-delay:.53s}
+.outro{position:relative;border-top:1px solid var(--line);overflow:hidden;padding:46px 0 58px}
+.mq{overflow:hidden;white-space:nowrap}
+.mqin{display:inline-flex;align-items:center;will-change:transform}
+.mqin span{font-family:var(--serif);font-weight:380;font-variation-settings:"opsz" 144;font-size:clamp(64px,11vw,176px);line-height:1;letter-spacing:-.045em;padding:0 .18em}
+.mqin span em{font-style:italic;color:var(--o)}
+.mqin i{font-family:JB,var(--mono);font-style:normal;font-weight:800;font-size:clamp(40px,6vw,92px);color:var(--o);display:inline-block;padding:0 .3em}
+.btn,.pill{will-change:transform}
+
 /* reveal */
 .rv{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
 .rv.vis{opacity:1;transform:none}
@@ -390,6 +418,8 @@ html.intro #globeCv{visibility:hidden}
   .eyebrow{flex-wrap:wrap;gap:6px 14px}
   .eyebrow .st{margin-left:0;width:100%}
   .mapin{width:900px}
+  .bignum{top:22px;font-size:120px}
+  .ca code{max-width:52vw}
   .facts{grid-template-columns:repeat(2,minmax(0,1fr));width:auto}
   .facts div{margin-right:0;padding-right:12px;border-right:0}
   .facts div:nth-child(-n+2){border-bottom:1px solid var(--line);padding-bottom:12px}
@@ -397,7 +427,7 @@ html.intro #globeCv{visibility:hidden}
   .planet .pk span{margin-left:0;width:100%}
   .sevrow{grid-auto-columns:minmax(240px,82%)}
 }
-@media (prefers-reduced-motion:reduce){.tapein,.flow i,.planet .pk i,.sc{animation:none}.sc,.plate h2 .hw,.eyebrow b,.route .node,.clauses li,.vstat>div,.kitchen .card,.calc>div,.pt,.facts div,.wckl li{opacity:1!important;transform:none!important;transition:none!important}.plate:before{transform:none;transition:none}.rv,.hero h1 .w{transition:none;opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.plate.vis .route .node .dot{animation:none!important}.rule .big .sw{color:inherit}.tapein,.flow i,.planet .pk i,.sc{animation:none}.sc,.plate h2 .hw,.eyebrow b,.route .node,.clauses li,.vstat>div,.kitchen .card,.calc>div,.pt,.facts div,.wckl li{opacity:1!important;transform:none!important;transition:none!important}.plate:before{transform:none;transition:none}.rv,.hero h1 .w{transition:none;opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -405,7 +435,6 @@ html.intro #globeCv{visibility:hidden}
 <div class="introv" id="intro" aria-hidden="true"><canvas id="introCv"></canvas><i id="introBar"></i></div>
 <canvas id="ground" aria-hidden="true"></canvas>
 
-<div class="strip" id="strip"><div class="wrap"><i></i><span id="stripTxt">$WORLD does not exist yet. Anyone posting a contract address before it appears on this page is scamming you.</span></div></div>
 
 <header class="nav">
   <div class="wrap">
@@ -415,7 +444,6 @@ html.intro #globeCv{visibility:hidden}
     </nav>
     <div class="right"><a class="pill" id="navX" href="#" target="_blank" rel="noopener" hidden>𝕏</a><a class="pill solid" id="navBuy" href="#" target="_blank" rel="noopener" hidden>buy $WORLD</a><button class="menu" id="menuBtn" type="button" aria-expanded="false" aria-controls="sheet">menu</button></div>
   </div>
-  <i class="prog" id="prog" aria-hidden="true"></i>
 </header>
 <nav class="sheet" id="sheet" aria-label="Sections" hidden><a href="#rule"><span>01</span>the rule</a><a href="#route"><span>02</span>the route</a><a href="#calculator"><span>03</span>calculator</a><a href="#world"><span>04</span>world now</a><a href="#kitchen"><span>05</span>the kitchen</a><a href="#ledger"><span>06</span>ledger</a><a href="#faq"><span>07</span>faq</a></nav>
 
@@ -430,6 +458,7 @@ html.intro #globeCv{visibility:hidden}
         <a class="btn solid" id="heroRule" href="#rule">read the rule ↓</a>
         <a class="btn" href="#world">see the world right now ↓</a>
       </div>
+      <div class="ca" id="caPill" hidden><span class="k">CA</span><code id="caTxt"></code><button type="button" id="copyCa">copy</button></div>
       <dl class="facts" id="facts">
         <div><dt>creator fee to WCK</dt><dd class="o">100%</dd></div>
         <div><dt>per curve trade</dt><dd>0.30%</dd></div>
@@ -608,13 +637,15 @@ html.intro #globeCv{visibility:hidden}
     </div>
   </div>
 </section>
+<section class="outro" id="outro" aria-hidden="true">
+  <div class="mq"><div class="mqin" id="mqIn"></div></div>
+</section>
 </main>
 
-<div class="foot"><div class="wrap">$WORLD is an independent memecoin, not affiliated with or endorsed by World Central Kitchen, The Giving Block or pump.fun. Nothing here is financial advice.</div></div>
 <div class="toast" id="toast" role="status"></div>
 <span class="sr" aria-live="polite" id="live"></span>
 
-<script src="/assets/land.js?v=469172"></script>
-<script src="/assets/app.js?v=469172"></script>
+<script src="/assets/land.js?v=469202"></script>
+<script src="/assets/app.js?v=469202"></script>
 </body>
 </html>

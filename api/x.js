@@ -116,7 +116,7 @@ async function coin(ca) {
 module.exports = async (req, res) => {
   const a = String((req.query && req.query.a) || 'cfg');
   try {
-    if (a === 'cfg') { const sol = await solPrice(); return send(res, 200, { ok: true, ca: env('WORLD_CA'), x: env('WORLD_X'), vault: env('WORLD_VAULT'), cadence: env('WORLD_CADENCE') || 'daily', sol }, 60); }
+    if (a === 'cfg') { const sol = await solPrice(); return send(res, 200, { ok: true, ca: env('WORLD_CA'), x: env('WORLD_X'), vault: env('WORLD_VAULT'), pad: env('WORLD_PAD'), cadence: env('WORLD_CADENCE') || 'daily', sol }, 60); }
     if (a === 'world') { const w = await worldOrFallback(); return send(res, 200, w, w.ok ? 600 : 30); }
     if (a === 'wck') { const w = await wck().catch(e => ({ ok: false, error: 'wck.org did not answer' })); return send(res, 200, w, w.ok ? 3600 : 120); }
     if (a === 'vault') {

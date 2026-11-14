@@ -44,11 +44,22 @@
     return isLand(lat, lon) ? [limb > .8 ? '=' : '-', NIGHT_LAND, .5 + .35 * limb] : ['.', NIGHT_SEA, .26 + .3 * limb]; };
 
   // ---------------------------------------------------------------- the ground: a dotted sea that drifts
-  (() => { const cv = $('#ground'), x = cv.getContext('2d'); let W, H, dpr, last = 0; const S = 24;
+  (() => { const cv = $('#ground'), x = cv.getContext('2d'); let W, H, dpr, last = 0, mx = -999, my = -999, pm = 0; const S = 24, rings = [];
     const size = () => { dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; draw(0); };
-    function draw(ts) { x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H); const ox = (ts / 260) % S, oy = (ts / 520) % S; x.fillStyle = 'rgba(47,127,208,.13)';
-      for (let yy = -S + oy; yy < H + S; yy += S) for (let xx = -S + ox + ((Math.round((yy - oy) / S) & 1) ? S / 2 : 0); xx < W + S; xx += S) { const w = .55 + .45 * Math.sin(xx * .011 + ts / 3200) * Math.cos(yy * .013 - ts / 4100); x.globalAlpha = .35 + .65 * w; x.fillRect(xx, yy, 1.6, 1.6); } x.globalAlpha = 1; }
-    const loop = ts => { requestAnimationFrame(loop); if (document.hidden || ts - last < 50) return; last = ts; draw(ts); };
+    function draw(ts) { x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H); const ox = (ts / 260) % S, oy = (ts / 520) % S, now = performance.now();
+      for (let k = rings.length - 1; k >= 0; k--) if (now - rings[k].t > 1700) rings.splice(k, 1);
+      pm += ((now - mvT < 1200 ? 1 : 0) - pm) * .12;
+      for (let yy = -S + oy; yy < H + S; yy += S) for (let xx = -S + ox + ((Math.round((yy - oy) / S) & 1) ? S / 2 : 0); xx < W + S; xx += S) {
+        let px = xx, py = yy, hot = 0; const w = .55 + .45 * Math.sin(xx * .011 + ts / 3200) * Math.cos(yy * .013 - ts / 4100);
+        if (pm > .02) { const dx = xx - mx, dy = yy - my, d = Math.hypot(dx, dy); if (d < 150 && d > .1) { const f = Math.pow(1 - d / 150, 2) * pm; px += dx / d * f * 16; py += dy / d * f * 16; hot = Math.max(hot, f); } }
+        for (const r of rings) { const rr = (now - r.t) * .55, dx = xx - r.x, dy = yy - r.y, d = Math.hypot(dx, dy), band = 1 - Math.abs(d - rr) / 26; if (band > 0 && d > .1) { const f = band * (1 - (now - r.t) / 1700); px += dx / d * f * 10; py += dy / d * f * 10; hot = Math.max(hot, f); } }
+        if (hot > .05) { x.globalAlpha = .35 + .65 * hot; x.fillStyle = C.o; x.fillRect(px - .5, py - .5, 2.6, 2.6); }
+        else { x.globalAlpha = (.35 + .65 * w) * .13 / .13; x.fillStyle = 'rgba(47,127,208,.13)'; x.fillRect(px, py, 1.6, 1.6); } }
+      x.globalAlpha = 1; }
+    let mvT = -1e9; const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (fine) addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; mvT = performance.now(); }, { passive: true });
+    addEventListener('pointerdown', e => { if (e.target.closest('input,button,a,.globe,.map,.seis')) return; rings.push({ x: e.clientX, y: e.clientY, t: performance.now() }); if (rings.length > 5) rings.shift(); }, { passive: true });
+    const loop = ts => { requestAnimationFrame(loop); if (document.hidden || ts - last < 33) return; last = ts; draw(ts); };
     addEventListener('resize', size); size(); if (!RM) requestAnimationFrame(loop); })();
 
   // ---------------------------------------------------------------- the clock
@@ -117,13 +128,14 @@
         if (!RM && t < rv + 160) { x.globalAlpha = .45; x.fillStyle = C.g; x.fillText(DUST[Math.floor(hash(k.c, k.r + Math.floor(t / 45)) * 14)], k.gx, k.gy); continue; }
         const L = look(k, sun); if (!L) continue; x.globalAlpha = L[2]; x.fillStyle = L[1]; x.fillText(L[0], k.gx, k.gy); }
       const I = (a, b) => [a, b]; I.k = 1; markers = (t > 900 || RM) ? drawMarkers(x, now, I) : []; x.font = f; x.globalAlpha = 1; }
+    let sy = scrollY; addEventListener('scroll', () => { const d = scrollY - sy; sy = scrollY; if (!held && !drag && !RM) { vlon -= d * .012; vlon = clamp(vlon, -2.4, 2.4); } const k = clamp(scrollY / innerHeight, 0, 1); box.style.transform = RM ? '' : `translate3d(0,${(k * 70).toFixed(1)}px,0) scale(${(1 - k * .12).toFixed(3)})`; }, { passive: true });
     function loop(now) { requestAnimationFrame(loop); if (held || document.hidden || !size) return; if (now - last < 33) return; const dt = Math.min(80, now - (last || now)); last = now;
       if (!drag) { if (now - lastInput > 1800 && !RM) vlon += (-.0062 * dt - vlon) * .04; lon0 += vlon; lat0 = clamp(lat0 + vlat, -60, 70); vlat *= .9; if (now - lastInput > 1800) lat0 += (16 - lat0) * .01; }
       frame(now); }
     box.addEventListener('pointerdown', e => { drag = { x: e.clientX, y: e.clientY, lon0, lat0, t: performance.now() }; box.setPointerCapture(e.pointerId); vlon = 0; vlat = 0; lastInput = performance.now(); tip.classList.remove('on'); });
     box.addEventListener('pointermove', e => { const rc = box.getBoundingClientRect();
       if (drag) { const dx = e.clientX - drag.x, dy = e.clientY - drag.y, k = 180 / (R * Math.PI) * .95; const nl = drag.lon0 - dx * k, nt = clamp(drag.lat0 + dy * k, -60, 70); vlon = (nl - lon0) * .5; vlat = 0; lon0 = nl; lat0 = nt; lastInput = performance.now(); return; }
-      const mx = e.clientX - rc.left, my = e.clientY - rc.top; let best = null, bd = 16; for (const m of markers) { const d = Math.hypot(m.px - mx, m.py - my); if (d < bd) { bd = d; best = m; } }
+      const sc = rc.width ? size / rc.width : 1, mx = (e.clientX - rc.left) * sc, my = (e.clientY - rc.top) * sc; let best = null, bd = 16; for (const m of markers) { const d = Math.hypot(m.px - mx, m.py - my); if (d < bd) { bd = d; best = m; } }
       if (best) { tip.innerHTML = `<b>${esc(best.e.name)}</b><br>${esc(best.e.level)} alert · ${esc(when(best.e))}`; tip.style.left = best.px + 'px'; tip.style.top = best.py + 'px'; tip.classList.add('on'); box.style.cursor = 'pointer'; G.hover = best.e; }
       else { tip.classList.remove('on'); box.style.cursor = ''; G.hover = null; } });
     const end = e => { if (!drag) return; const moved = Math.hypot(e.clientX - drag.x, e.clientY - drag.y); drag = null; lastInput = performance.now(); if (moved < 4 && G.hover && G.hover.url) window.open(G.hover.url, '_blank', 'noopener'); };
@@ -220,6 +232,8 @@
       for (const e of list) { const c = colOf(e.lon), r = rowOf(e.lat); if (r < 0 || r >= rows) continue; const px = (c + .5) * cw, py = (r + .5) * ch, hl = S.hl === e.id;
         pts.push({ e, px, py });
         if (e.level !== 'green' || hl) { const p = ((now / 1700) + hash(c, r)) % 1; x.globalAlpha = (1 - p) * (hl ? .95 : .6); x.strokeStyle = LV[e.level]; x.lineWidth = hl ? 1.8 : 1.2; x.beginPath(); x.arc(px, py, 5 + p * (hl ? 30 : 20), 0, 6.283); x.stroke(); } }
+      if (!RM) { const sx = ((now / 7000) % 1) * W; x.globalAlpha = .55; x.fillStyle = C.o; x.fillRect(Math.round(sx), 0, 1, H); x.globalAlpha = .18; x.fillRect(Math.round(sx) - 3, 0, 3, H);
+        for (const p of pts) if (p.e && sx - p.px > 0 && sx - p.px < 60) { const q = (sx - p.px) / 60; x.globalAlpha = (1 - q) * .8; x.strokeStyle = LV[p.e.level]; x.lineWidth = 1.3; x.beginPath(); x.arc(p.px, p.py, 4 + q * 16, 0, 6.283); x.stroke(); } x.globalAlpha = 1; }
       for (const p of pts) { if (!p.e) continue; const hl = S.hl === p.e.id; x.globalAlpha = 1; x.fillStyle = C.card; x.fillRect(p.px - cw * .9, p.py - ch * .5, cw * 1.8, ch); x.fillStyle = LV[p.e.level] || C.o; x.font = `800 ${fs * (hl ? 1.7 : 1.3)}px JB, ui-monospace, monospace`; x.textAlign = 'center'; x.fillText(GLYPH[p.e.code] || '*', p.px, p.py + fs * (hl ? .55 : .42)); }
       x.textAlign = 'left'; x.globalAlpha = 1; x.font = `500 ${W > 900 ? 10.5 : 9.5}px DMM, ui-monospace, monospace`; const placed = [];
       for (const l of labels) { const t = l.m.n.toLowerCase(), tw = x.measureText(t).width, lx = l.px + tw + 20 > W ? l.px - tw - 19 : l.px + 7;
@@ -324,7 +338,9 @@
       const capSol = capUsd / S.solUsd; idx = TIERS.findIndex(t => capSol >= t[0] && capSol < t[1]); const t = TIERS[idx]; rate = t[2]; where = `on PumpSwap at a $${Math.round(capUsd).toLocaleString('en-US')} market cap`;
       label = `$${Math.round(capUsd).toLocaleString('en-US')} is ${Math.round(capSol).toLocaleString('en-US')} SOL of market cap at $${S.solUsd.toFixed(2)} a SOL, which is the ${t[1] === Infinity ? t[0].toLocaleString('en-US') + '+' : t[0].toLocaleString('en-US') + '–' + t[1].toLocaleString('en-US')} SOL tier: ${pct(rate)}`; }
     const fee = size * rate / 100, feeUsd = S.solUsd ? fee * S.solUsd : null;
-    out.className = 'out'; out.innerHTML = `${esc(sol(fee))}${feeUsd != null ? ` <em>≈ ${esc(usd(feeUsd))}</em>` : ''}`;
+    out.className = 'out'; const paint = v => { out.innerHTML = `${esc(sol(v))}${S.solUsd ? ` <em>≈ ${esc(usd(v * S.solUsd))}</em>` : ''}`; };
+    const from = calc.last || 0; calc.last = fee; cancelAnimationFrame(calc.raf);
+    if (RM || !from || Math.abs(from - fee) / fee > 50) paint(fee); else { const t0 = performance.now(); const f = now => { const p = clamp((now - t0) / 420, 0, 1); paint(p < 1 ? lerp(from, fee, eout(p)) : fee); if (p < 1) calc.raf = requestAnimationFrame(f); }; calc.raf = requestAnimationFrame(f); }
     why.textContent = `${size.toLocaleString('en-US', { maximumFractionDigits: 6 })} SOL × ${pct(rate)} = ${fee.toFixed(9).replace(/0+$/, '').replace(/\.$/, '')} SOL to the kitchen. ${label}.`;
     paintTiers(idx); say(out.textContent);
     setCard({ sizeTxt: size.toLocaleString('en-US', { maximumFractionDigits: 6 }), feeTxt: sol(fee), feeUsd, rate: pct(rate), where }); }
@@ -364,7 +380,7 @@
     const c = S.cfg, ss = $('#solSt');
     $('#hSol').textContent = S.solUsd ? usd(S.solUsd) : '—';
     if (S.solUsd) { ss.className = 'st live'; ss.querySelector('span').textContent = `SOL ${usd(S.solUsd)} · live`; } else { ss.className = 'st off'; ss.querySelector('span').textContent = 'SOL price offline: the curve still works'; }
-    if (c.ca) { $('#strip').querySelector('.wrap').innerHTML = `<i></i><span>official token $WORLD</span><code>${esc(c.ca)}</code><button type="button" id="copyCa">copy</button><span>anything else is not ours.</span>`;
+    if (c.ca) { $('#caTxt').textContent = c.ca; $('#caPill').hidden = false;
       $('#copyCa').addEventListener('click', () => navigator.clipboard.writeText(c.ca).then(() => toast('contract address copied'), () => toast('copy failed: select it by hand')));
       const buy = `https://pump.fun/coin/${encodeURIComponent(c.ca)}`; for (const id of ['#navBuy', '#heroBuy']) { $(id).href = buy; $(id).hidden = false; } $('#heroRule').classList.remove('solid'); }
     if (c.x) { const u = /^https?:/.test(c.x) ? c.x : `https://x.com/${c.x.replace(/^@/, '')}`; $('#navX').href = u; $('#navX').hidden = false; }
@@ -432,12 +448,37 @@
   // ---------------------------------------------------------------- the phone menu and the reading line
   (() => { const b = $('#menuBtn'), sh = $('#sheet'); const set = v => { if (v) { const nb = $('.nav').getBoundingClientRect().bottom; sh.style.top = nb + 'px'; sh.style.maxHeight = `calc(100vh - ${nb}px)`; } sh.hidden = !v; b.setAttribute('aria-expanded', v); b.textContent = v ? 'close' : 'menu'; document.documentElement.classList.toggle('menu-open', v); };
     b.addEventListener('click', () => set(sh.hidden)); sh.addEventListener('click', e => { if (e.target.closest('a')) set(false); }); addEventListener('keydown', e => { if (e.key === 'Escape' && !sh.hidden) set(false); }); })();
-  (() => { const pr = $('#prog'); const f = () => { const h = document.documentElement.scrollHeight - innerHeight; pr.style.transform = `scaleX(${h > 0 ? clamp(scrollY / h, 0, 1) : 0})`; }; addEventListener('scroll', f, { passive: true }); f(); })();
+
+  // ---------------------------------------------------------------- motion everywhere
+  // giant outline section numbers that drift against the scroll
+  const BIG = $$('.plate').map(pl => { const n = (pl.querySelector('.eyebrow b') || {}).textContent; if (!n) return null; const el = document.createElement('span'); el.className = 'bignum'; el.setAttribute('aria-hidden', 'true'); el.textContent = n; pl.prepend(el); return { pl, el }; }).filter(Boolean);
+  // eyebrow labels decode from glyphs when their plate arrives
+  $$('.plate .eyebrow').forEach(eb => { const b = eb.querySelector('b'); if (!b) return; const tn = b.nextSibling; if (!tn || tn.nodeType !== 3) return; const sp = document.createElement('span'); sp.className = 'tx'; sp.textContent = tn.textContent; sp.dataset.t = tn.textContent; tn.replaceWith(sp); });
+  function scramble(sp) { if (RM || sp.dataset.done) return; sp.dataset.done = 1; const T = sp.dataset.t, t0 = performance.now(), d = 700;
+    const f = now => { const p = clamp((now - t0) / d, 0, 1), n = Math.floor(T.length * p); sp.textContent = T.slice(0, n) + T.slice(n).replace(/\S/g, () => DUST[Math.floor(Math.random() * DUST.length)]); if (p < 1) requestAnimationFrame(f); else sp.textContent = T; }; requestAnimationFrame(f); }
+  // the rule's big sentence lights up word by word as you read down the plate
+  const BIGQ = $('.rule .big'); const QW = [];
+  if (BIGQ) { const walk = n => [...n.childNodes].forEach(c => { if (c.nodeType === 3) { const f = document.createDocumentFragment(); c.textContent.split(/(\s+)/).forEach(w => { if (!w) return; if (/^\s+$/.test(w)) f.append(w); else { const sp = document.createElement('span'); sp.className = 'sw'; sp.textContent = w; QW.push(sp); f.append(sp); } }); c.replaceWith(f); } else if (c.nodeType === 1) walk(c); }); walk(BIGQ); }
+  // magnetic buttons (mouse only)
+  if (!RM && matchMedia('(hover: hover) and (pointer: fine)').matches) $$('.btn,.pill,.ca button').forEach(b => {
+    b.addEventListener('pointermove', e => { const r = b.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2); b.style.transform = `translate(${clamp(dx * .22, -8, 8)}px,${clamp(dy * .32, -6, 6)}px)`; });
+    b.addEventListener('pointerleave', () => { b.style.transform = ''; }); });
+  // the closing marquee: speeds up with the scroll, and runs backwards when you scroll up
+  const MQ = $('#mqIn'); if (MQ) { const unit = '<span>every trade feeds the <em>world.</em></span><i>*</i>'; MQ.innerHTML = unit.repeat(6); }
+  let mqX = 0, mqV = 0, lastY = scrollY, lastT = performance.now();
+  function scrollFx() { const vh = innerHeight;
+    for (const b of BIG) { const r = b.pl.getBoundingClientRect(); if (r.bottom < -200 || r.top > vh + 200) continue; b.el.style.transform = `translate3d(0,${((r.top - vh * .3) * -.22).toFixed(1)}px,0)`; }
+    if (BIGQ && QW.length) { const r = BIGQ.closest('.plate').getBoundingClientRect(), p = clamp((vh * .78 - r.top) / (r.height * .55), 0, 1), n = Math.round(p * QW.length); QW.forEach((w, i) => w.classList.toggle('on', i < n)); } }
+  if (!RM) { addEventListener('scroll', scrollFx, { passive: true }); scrollFx(); } else QW.forEach(w => w.classList.add('on'));
+  (function mqLoop(now) { requestAnimationFrame(mqLoop); if (!MQ || document.hidden) return; const dt = Math.min(64, now - lastT); lastT = now; const dy = scrollY - lastY; lastY = scrollY;
+    mqV += (dy * .9 - mqV) * .1; const r = MQ.getBoundingClientRect(); if (r.bottom < -50 || r.top > innerHeight + 50) return; const half = MQ.scrollWidth / 2;
+    mqX -= (RM ? 0 : .045 * dt) + mqV * .6; if (half) { mqX = ((mqX % half) - half) % half; } MQ.style.transform = `translate3d(${mqX.toFixed(1)}px,0,0)`; })(performance.now());
 
   // ---------------------------------------------------------------- reveal, scroll-spy, hero
-  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+  const onVis = el => { el.classList.add('vis'); const sp = el.querySelector('.eyebrow .tx'); if (sp) scramble(sp); };
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { onVis(e.target); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
   $$('.rv').forEach(el => io.observe(el));
-  const sweep = () => $$('.rv:not(.vis)').forEach(el => { if (el.getBoundingClientRect().top < innerHeight * .95) el.classList.add('vis'); });
+  const sweep = () => $$('.rv:not(.vis)').forEach(el => { if (el.getBoundingClientRect().top < innerHeight * .95) onVis(el); });
   addEventListener('scroll', sweep, { passive: true }); addEventListener('hashchange', () => setTimeout(sweep, 60));
   const links = $$('#links a').filter(a => a.getAttribute('href').startsWith('#')), secs = links.map(a => $(a.getAttribute('href'))).filter(Boolean);
   const spy = () => { let cur = null; for (const s of secs) if (s.getBoundingClientRect().top < 140) cur = s.id; links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + cur)); };

@@ -25,7 +25,7 @@ async function solPrice() {
 }
 
 // ---------------------------------------------------------------- the world right now (GDACS + USGS, fallback USGS only)
-// GDACS's "current" feed stops at 100 events and is mostly small wildfires, so three reads are merged:
+// (GDACS's SEARCH rejects TS in eventlist: it answers 204.) GDACS's "current" feed stops at 100 events and is mostly small wildfires, so three reads are merged:
 // every red and orange alert of the last 30 days, every non-wildfire alert of the last 7, and the current feed.
 const TYPES = { EQ: 'earthquake', TC: 'cyclone', FL: 'flood', VO: 'volcano', DR: 'drought', WF: 'wildfire', TS: 'tsunami' };
 const GD = 'https://www.gdacs.org/gdacsapi/api/events/geteventlist/';
@@ -39,8 +39,8 @@ async function world() {
   const now = Date.now(), win = (d0, d1) => `&fromDate=${ymd(now - d0 * DAY)}&toDate=${ymd(now + d1 * DAY)}&pageSize=100`;
   const [cur, serious, week, usgs] = await Promise.allSettled([
     get(GD + 'EVENTS4APP', {}, 9000),
-    get(GD + 'SEARCH?eventlist=EQ;TC;FL;VO;DR;WF;TS&alertlevel=Orange;Red' + win(30, 1), {}, 9000),
-    get(GD + 'SEARCH?eventlist=EQ;TC;FL;VO;DR;TS&alertlevel=Green;Orange;Red' + win(7, 1), {}, 9000),
+    get(GD + 'SEARCH?eventlist=EQ;TC;FL;VO;DR;WF&alertlevel=Orange;Red' + win(30, 1), {}, 9000),
+    get(GD + 'SEARCH?eventlist=EQ;TC;FL;VO;DR&alertlevel=Green;Orange;Red' + win(7, 1), {}, 9000),
     get('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson', {}, 8000)]);
   const seen = new Map();
   for (const r of [serious, week, cur]) if (r.status === 'fulfilled') for (const f of (r.value.features || [])) { const e = gdacsEvent(f); if (isFinite(e.lat) && isFinite(e.lon) && !seen.has(e.id)) seen.set(e.id, e); }

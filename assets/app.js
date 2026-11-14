@@ -1,5 +1,5 @@
 /* $WORLD — the site. A live ASCII globe lit by the real sun, a world map of live GDACS alerts with day, night and
-   mealtime, a fee calculator that follows pump.fun's published table to the decimal, and a ledger read straight from
+   mealtime, a fee calculator for the coin's own Raydium launchpad (1% to the kitchen), and a ledger read straight from
    Solana. No numbers on this page are invented. */
 (() => {
   'use strict';
@@ -264,19 +264,78 @@
   function visible() { return S.filter === 'all' ? S.events : S.events.filter(e => e.code === S.filter); }
   function setHL(id) { S.hl = id; $$('#alerts li').forEach(li => li.classList.toggle('hl', li.dataset.id === id)); $$('#sevRow .sc').forEach(a => a.classList.toggle('hl', a.dataset.id === id)); M.draw(); }
   const byRecent = (a, b) => (LW[b.level] - LW[a.level]) || (tms(b.to || b.from) - tms(a.to || a.from));
+  const TORDER = ['EQ', 'TC', 'FL', 'WF', 'DR', 'VO', 'TS'];
+  const isActive = e => isFinite(tms(e.to)) && Date.now() - tms(e.to) < 3 * 864e5;
   function paintAlerts() {
-    const all = S.events, counts = {}; all.forEach(e => counts[e.code] = (counts[e.code] || 0) + 1);
-    const chips = [['all', 'all', all.length], ...Object.keys(counts).sort((a, b) => counts[b] - counts[a]).map(k => [k, TNAME[k] || k, counts[k]])];
-    $('#chips').innerHTML = chips.map(([k, n, v]) => `<button type="button" data-f="${k}" class="${S.filter === k ? 'on' : ''}">${esc(n)}<small>${v}</small></button>`).join('');
+    const all = S.events, counts = {}; all.forEach(e => { const c = counts[e.code] || (counts[e.code] = { n: 0, red: 0, orange: 0, green: 0 }); c.n++; c[e.level] = (c[e.level] || 0) + 1; });
+    const types = Object.keys(counts).sort((a, b) => TORDER.indexOf(a) - TORDER.indexOf(b));
+    const tile = (k, g, n, l, c, i) => `<button type="button" class="wt ${S.filter === k ? 'on' : ''}" data-f="${k}" style="--i:${i}" aria-pressed="${S.filter === k}"><span class="g" style="color:${k === 'all' ? C.o : c && (c.red ? C.red : c.orange ? C.o : C.g)}">${g}</span><span class="n">${n}</span><span class="l">${esc(l)}</span>${c ? `<span class="lv3">${['red', 'orange', 'green'].map(lv => c[lv] ? `<i style="width:${c[lv] / c.n * 100}%;background:${LV[lv]}"></i>` : '').join('')}</span>` : `<span class="lv3"><i style="width:100%;background:var(--ink)"></i></span>`}</button>`;
+    $('#wStats').innerHTML = tile('all', '#', all.length, 'every alert', null, 0) + types.map((k, i) => tile(k, esc(GLYPH[k] || '*'), counts[k].n, TNAME[k] || k, counts[k], i + 1)).join('');
     const list = visible().slice().sort(byRecent), N = S.showAll ? list.length : 12;
-    $('#alerts').innerHTML = list.slice(0, N).map(e => `<li data-id="${esc(e.id)}"><span class="ic" style="color:${LV[e.level]}">${esc(GLYPH[e.code] || '*')}</span><span class="t"><b>${esc(e.name)}</b><small>${esc([e.country, e.severity, when(e)].filter(Boolean).join(' · '))}</small></span><span class="lv ${esc(e.level)}">${esc(e.level)}</span><a href="${esc(e.url)}" target="_blank" rel="noopener">report ↗</a></li>`).join('');
+    $('#lCountTxt').textContent = `${list.length} ${S.filter === 'all' ? 'alerts' : (TNAME[S.filter] || S.filter)} · serious first`;
+    $('#alerts').innerHTML = list.slice(0, N).map(e => `<li data-id="${esc(e.id)}"><span class="ic" style="color:${LV[e.level]}">${esc(GLYPH[e.code] || '*')}</span><span class="t"><b>${esc(e.name)}</b><small>${esc([e.country, when(e)].filter(Boolean).join(' · '))}</small></span><span class="lv ${esc(e.level)}">${esc(e.level)}</span><a href="${esc(e.url)}" target="_blank" rel="noopener">report ↗</a>
+      <span class="more">${e.severity ? esc(e.severity) + '<br>' : ''}${esc(TNAME[e.code] || 'event')} · started ${esc(dm(e.from))}${isFinite(tms(e.to)) && tms(e.to) - tms(e.from) > 864e5 ? ' · last update ' + esc(dm(e.to)) : ''} · ${Math.abs(e.lat).toFixed(1)}°${e.lat >= 0 ? 'N' : 'S'} ${Math.abs(e.lon).toFixed(1)}°${e.lon >= 0 ? 'E' : 'W'}${isActive(e) ? ' · <b style="color:var(--red)">active</b>' : ''}<br><a href="${esc(e.url)}" target="_blank" rel="noopener">open the GDACS report ↗</a></span></li>`).join('');
     $('#moreBtn').hidden = list.length <= 12; $('#moreBtn').textContent = S.showAll ? 'show fewer' : `show all ${list.length}`;
     const sev = all.filter(e => e.level !== 'green').sort(byRecent);
     $('#sev').hidden = !sev.length;
-    $('#sevRow').innerHTML = sev.map((e, i) => { const active = isFinite(tms(e.to)) && Date.now() - tms(e.to) < 3 * 864e5;
+    $('#sevRow').innerHTML = sev.map((e, i) => { const active = isActive(e);
       return `<a class="sc" style="--i:${i}" data-id="${esc(e.id)}" href="${esc(e.url)}" target="_blank" rel="noopener"><span class="top"><span class="g" style="color:${LV[e.level]}">${esc(GLYPH[e.code] || '*')}</span><span class="lv ${esc(e.level)}">${esc(e.level)}</span></span><b>${esc(e.name)}</b><small>${esc(e.severity || TNAME[e.code] || '')}</small><small class="cty">${esc(e.country)}</small><span class="when"><span class="${active ? 'act' : ''}">${active ? '● active' : 'ended'} · ${esc(dm(e.from))}${tms(e.to) - tms(e.from) > 864e5 ? ' – ' + esc(dm(e.to)) : ''}</span><span>GDACS ↗</span></span></a>`; }).join('');
-    M.draw(); }
-  $('#chips').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.filter = b.dataset.f; S.showAll = false; paintAlerts(); say(`showing ${b.textContent}`); });
+    paintSpot(); TL.set(); paintCountries(); M.draw(); }
+
+  // the spotlight: the most serious alert, with a close-up ASCII map of its region
+  const SP = { e: null, t0: 0 };
+  function paintSpot() {
+    const all = S.events; if (!all.length) { $('#spot').hidden = true; return; }
+    const pick = all.slice().sort((a, b) => (LW[b.level] - LW[a.level]) || ((isActive(b) ? 1 : 0) - (isActive(a) ? 1 : 0)) || (tms(b.to || b.from) - tms(a.to || a.from)))[0];
+    SP.e = pick; SP.t0 = performance.now(); $('#spot').hidden = false;
+    $('#spotK').textContent = pick.level !== 'green' ? (isActive(pick) ? 'the most serious alert right now' : 'the most serious alert this month') : 'the latest alert';
+    const near = all.filter(e => e !== pick && Math.abs(e.lat - pick.lat) < 14 && Math.abs(((e.lon - pick.lon + 540) % 360) - 180) < 24).length;
+    $('#spotI').innerHTML = `<b>${esc(pick.name)}</b><div class="row"><span><b style="color:${LV[pick.level]}">${esc(pick.level)} alert</b></span><span>${esc(TNAME[pick.code] || 'event')}</span><span>${isActive(pick) ? '<b style="color:var(--red)">active</b>' : 'ended'}</span><span>${esc(when(pick))}</span></div>${pick.severity ? `<div class="row">${esc(pick.severity)}</div>` : ''}<div class="row">${esc(pick.country)}</div><div class="row"><span>${near} other alert${near === 1 ? '' : 's'} nearby</span><a href="${esc(pick.url)}" target="_blank" rel="noopener">the GDACS report ↗</a></div>`;
+    drawSpot(performance.now()); }
+  function drawSpot(now) { const cv = $('#spotCv'), e = SP.e; if (!e || !cv.clientWidth) return; const dpr = Math.min(2, devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
+    if (cv.width !== Math.round(W * dpr)) { cv.width = W * dpr; cv.height = H * dpr; } const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
+    const spanLon = 48, spanLat = spanLon * H / W, cols = Math.round(W / 6.2), cw = W / cols, fs = cw / .6, ch = fs * 1.18, rows = Math.floor(H / ch), sun = SUN(), lat0 = e.lat + spanLat / 2;
+    const latOf = r => lat0 - (r + .5) / rows * spanLat, lonOf = c => e.lon - spanLon / 2 + (c + .5) / cols * spanLon, rv = RM ? 1 : clamp((now - SP.t0) / 900, 0, 1);
+    x.font = `600 ${fs}px JB, ui-monospace, monospace`; x.textBaseline = 'alphabetic';
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) { if (Math.hypot(c / cols - .5, r / rows - .5) > rv * .75) continue; const la = latOf(r), lo = ((lonOf(c) + 540) % 360) - 180, L = isLand(la, lo), night = sunAlt(la, lo, sun) < -.035, gx = c * cw, gy = r * ch + ch * .78;
+      if (L) { const coast = !isLand(la + spanLat / rows, lo) || !isLand(la - spanLat / rows, lo) || !isLand(la, lo + spanLon / cols) || !isLand(la, lo - spanLon / cols); x.globalAlpha = coast ? .95 : night ? .8 : .6; x.fillStyle = coast ? '#3f3d37' : night ? '#5e5a51' : '#8f8a7d'; x.fillText('#', gx, gy); }
+      else if ((r + c) % 2 === 0) { x.globalAlpha = night ? .42 : .38; x.fillStyle = night ? NIGHT_SEA : C.b; x.fillText('.', gx, gy); } }
+    const X = lo => (((lo - e.lon + 540) % 360) - 180 + spanLon / 2) / spanLon * W, Y = la => (lat0 - la) / spanLat * H;
+    x.globalAlpha = .35; x.strokeStyle = C.o; x.lineWidth = 1; x.setLineDash([3, 4]); x.beginPath(); x.moveTo(W / 2, 0); x.lineTo(W / 2, H); x.moveTo(0, H / 2); x.lineTo(W, H / 2); x.stroke(); x.setLineDash([]);
+    for (const o of S.events) { if (o === e) continue; const px = X(o.lon), py = Y(o.lat); if (px < 0 || px > W || py < 0 || py > H) continue; x.globalAlpha = 1; x.fillStyle = C.card; x.fillRect(px - 6, py - 8, 12, 14); x.fillStyle = LV[o.level]; x.font = `800 ${fs * 1.4}px JB, ui-monospace, monospace`; x.textAlign = 'center'; x.fillText(GLYPH[o.code] || '*', px, py + 4); x.textAlign = 'left'; }
+    const p = (now / 1500) % 1, cx = W / 2, cy = H / 2; for (const k of [0, .5]) { const q = (p + k) % 1; x.globalAlpha = (1 - q) * .8; x.strokeStyle = LV[e.level]; x.lineWidth = 1.5; x.beginPath(); x.arc(cx, cy, 6 + q * 52, 0, 6.283); x.stroke(); }
+    x.globalAlpha = 1; x.fillStyle = C.card; x.beginPath(); x.arc(cx, cy, 13, 0, 6.283); x.fill(); x.fillStyle = LV[e.level]; x.font = `800 ${fs * 2.4}px JB, ui-monospace, monospace`; x.textAlign = 'center'; x.fillText(GLYPH[e.code] || '*', cx, cy + fs * .8); x.textAlign = 'left';
+    x.font = `500 10.5px DMM, ui-monospace, monospace`; const lb = `${Math.abs(e.lat).toFixed(1)}°${e.lat >= 0 ? 'N' : 'S'}  ${Math.abs(e.lon).toFixed(1)}°${e.lon >= 0 ? 'E' : 'W'}`; x.fillStyle = 'rgba(251,249,244,.94)'; x.fillRect(4, H - 24, x.measureText(lb).width + 12, 18); x.fillStyle = C.ink2; x.fillText(lb, 10, H - 11); }
+  (function spotLoop(now) { requestAnimationFrame(spotLoop); if (document.hidden || !SP.e) return; const r = $('#spot').getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; if (now - (spotLoop.l || 0) < 40) return; spotLoop.l = now; drawSpot(now); })(0);
+
+  // the timeline: every alert of the last 30 days, one lane per type, long ones drawn as spans
+  const TL = (() => { const cv = $('#tlCv'), tip = $('#tltip'); let W, H, dpr, t0 = 0, seen = false, pts = [];
+    const lanes = () => TORDER.filter(k => S.events.some(e => e.code === k));
+    function draw(now) { if (!cv.clientWidth) return; dpr = Math.min(2, devicePixelRatio || 1); W = cv.clientWidth; H = cv.clientHeight; if (cv.width !== Math.round(W * dpr)) { cv.width = W * dpr; cv.height = H * dpr; }
+      const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H); const L = lanes(), end = Date.now(), span = 30 * 864e5, lh = H / Math.max(1, L.length), LX = 78, P = RM ? 1 : clamp((now - t0) / 1600, 0, seen ? 1 : 0), lim = LX + (W - LX) * eio(P);
+      const tx = t => LX + (W - LX) * (1 - (end - t) / span); pts = [];
+      x.font = '500 10.5px DMM, ui-monospace, monospace'; x.textBaseline = 'middle';
+      L.forEach((k, i) => { const y = lh * i + lh / 2; x.globalAlpha = 1; x.fillStyle = C.ink2; x.fillText((TNAME[k] || k).slice(0, 11), 0, y); x.globalAlpha = .5; x.fillStyle = '#dcd5c5'; x.fillRect(LX, Math.round(y), W - LX, 1); });
+      for (let d = 0; d <= 30; d += 5) { const xx = tx(end - d * 864e5); x.globalAlpha = .45; x.fillStyle = '#cfc7b4'; x.fillRect(Math.round(xx), 0, 1, H); }
+      for (const e of S.events) { const i = L.indexOf(e.code); if (i < 0) continue; const y = lh * i + lh / 2, a = Math.max(tms(e.from), end - span), b = Math.min(isFinite(tms(e.to)) ? tms(e.to) : a, end); if (!(b >= end - span)) continue;
+        const xa = tx(a), xb = Math.max(xa, tx(b)); if (xa > lim) continue; const xbb = Math.min(xb, lim), jit = (hash(e.id.length * 7 + i, Math.round(xa)) - .5) * lh * .5;
+        x.globalAlpha = e.level === 'green' ? .55 : .95; x.fillStyle = LV[e.level];
+        if (xbb - xa > 3) x.fillRect(xa, y + jit - 1.5, xbb - xa, 3); x.beginPath(); x.arc(xa, y + jit, e.level === 'green' ? 2.4 : 4, 0, 6.283); x.fill(); pts.push({ e, px: xa, py: y + jit }); }
+      if (P < 1 && seen) { x.globalAlpha = 1; x.fillStyle = C.o; x.fillRect(lim, 0, 1.5, H); } x.globalAlpha = 1; }
+    function loop(now) { requestAnimationFrame(loop); if (document.hidden || now - (loop.l || 0) < 40) return; loop.l = now; const r = cv.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; if (seen && now - t0 > 1800 && !loop.dirty) return; loop.dirty = false; draw(now); }
+    new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && !seen) { seen = true; t0 = performance.now(); } }), { threshold: .3 }).observe(cv);
+    cv.addEventListener('pointermove', ev => { const r = cv.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top; let b = null, bd = 10; for (const p of pts) { const d = Math.hypot(p.px - mx, p.py - my); if (d < bd) { bd = d; b = p; } }
+      if (!b) { tip.classList.remove('on'); return; } tip.innerHTML = `<b>${esc(b.e.name)}</b><br>${esc(b.e.level)} · ${esc(when(b.e))}`; tip.style.left = clamp(b.px, 110, W - 110) + 'px'; tip.style.top = b.py + 'px'; tip.classList.add('on'); });
+    cv.addEventListener('pointerleave', () => tip.classList.remove('on'));
+    new ResizeObserver(() => { loop.dirty = true; draw(performance.now()); }).observe(cv); requestAnimationFrame(loop);
+    return { set: () => { loop.dirty = true; draw(performance.now()); } }; })();
+
+  // countries named in the most alerts
+  function paintCountries() { const n = {}; for (const e of S.events) for (const c of String(e.country || '').split(',').map(t => t.trim()).filter(Boolean)) n[c] = (n[c] || 0) + 1;
+    const top = Object.entries(n).sort((a, b) => b[1] - a[1]).slice(0, 8), max = top.length ? top[0][1] : 1;
+    $('#ctry').innerHTML = top.length ? top.map(([c, v], i) => `<li style="--i:${i}"><span>${esc(c)}</span><span class="bar"><i style="--w:${(v / max).toFixed(3)}"></i></span><b>${v}</b></li>`).join('') : '<li><span>—</span></li>'; }
+  $('#wStats').addEventListener('click', e => { const b = e.target.closest('.wt'); if (!b) return; S.filter = b.dataset.f === S.filter && b.dataset.f !== 'all' ? 'all' : b.dataset.f; S.showAll = false; paintAlerts(); say(`showing ${S.filter === 'all' ? 'every alert' : TNAME[S.filter]}`); });
+  $('#alerts').addEventListener('click', e => { if (e.target.closest('a')) return; const li = e.target.closest('li'); if (li) li.classList.toggle('open'); });
   $('#moreBtn').addEventListener('click', () => { S.showAll = !S.showAll; paintAlerts(); });
   $('#alerts').addEventListener('pointerover', e => { const li = e.target.closest('li'); if (li) setHL(li.dataset.id); });
   $('#alerts').addEventListener('pointerleave', () => setHL(null));
@@ -301,52 +360,34 @@
       $('#gcapTxt').textContent = red + orange ? `live · ${red + orange} red and orange alerts this month · drag to turn` : `live · ${w.events.length} disaster alerts this week · drag to turn`;
       paintAlerts(); paintPlanet(w); $('#planet').classList.remove('off'); SEIS.set(w.planet && w.planet.quakes && w.planet.quakes.list);
     } catch (e) {
-      st.className = 'st off'; st.querySelector('span').textContent = 'feed offline'; $('#worldOff').hidden = false; $('#alerts').innerHTML = ''; $('#chips').innerHTML = ''; $('#sev').hidden = true;
+      st.className = 'st off'; st.querySelector('span').textContent = 'feed offline'; $('#worldOff').hidden = false; $('#alerts').innerHTML = ''; $('#wStats').innerHTML = ''; $('#sev').hidden = true; $('#spot').hidden = true;
       $('#gcapTxt').textContent = 'the alert feed is offline · drag to turn'; $('#planetSt').textContent = 'GDACS and USGS did not answer'; $('#planet').classList.add('off'); SEIS.set([]); }
   }
   $('#worldRetry').addEventListener('click', () => { $('#worldSt').querySelector('span').textContent = 'reading GDACS…'; $('#worldSt').className = 'st'; loadWorld(); });
 
-  // ---------------------------------------------------------------- the calculator: pump.fun's published creator fees, to the decimal
-  const CURVE = { creator: .30, protocol: .95, lp: 0, total: 1.25 };
-  const TIERS = [[0, 420, .300, .930, .020], [420, 1470, .950, .050, .200], [1470, 2460, .900, .050, .200], [2460, 3440, .850, .050, .200], [3440, 4420, .800, .050, .200], [4420, 9820, .750, .050, .200], [9820, 14740, .700, .050, .200],
-    [14740, 19650, .650, .050, .200], [19650, 24560, .600, .050, .200], [24560, 29470, .550, .050, .200], [29470, 34380, .500, .050, .200], [34380, 39300, .450, .050, .200], [39300, 44210, .400, .050, .200], [44210, 49120, .350, .050, .200],
-    [49120, 54030, .300, .050, .200], [54030, 58940, .275, .050, .200], [58940, 63860, .250, .050, .200], [63860, 68770, .225, .050, .200], [68770, 73681, .200, .050, .200], [73681, 78590, .175, .050, .200], [78590, 83500, .150, .050, .200],
-    [83500, 88400, .125, .050, .200], [88400, 93330, .100, .050, .200], [93330, 98240, .075, .050, .200], [98240, Infinity, .050, .050, .200]];
-  let venue = 'curve';
+  // ---------------------------------------------------------------- the calculator: $WORLD's own Raydium launchpad takes 1% of every curve trade
+  const RATE = { kitchen: 1, raydium: .25, pump: .30 };
   const num = s => { const v = parseFloat(String(s || '').replace(/[, _$]/g, '')); return isFinite(v) ? v : NaN; };
   const pct = v => (+v).toFixed(3).replace(/0+$/, '').replace(/\.$/, '') + '%';
-  function paintTiers(active) {
-    const rows = [`<tr class="sep"><td colspan="2">bonding curve</td></tr>`, `<tr data-i="curve" class="${active === 'curve' ? 'on' : ''}"><td>until graduation</td><td>${pct(CURVE.creator)}</td></tr>`, `<tr class="sep"><td colspan="2">PumpSwap · market cap in SOL</td></tr>`,
-      ...TIERS.map((t, i) => `<tr data-i="${i}" class="${active === i ? 'on' : ''}"><td>${t[1] === Infinity ? t[0].toLocaleString('en-US') + ' and up' : t[0].toLocaleString('en-US') + ' – ' + t[1].toLocaleString('en-US')}</td><td>${pct(t[2])}</td></tr>`)];
-    $('#tiers').innerHTML = `<table><thead><tr><th>where</th><th style="text-align:right">to the kitchen</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
-    const on = $('#tiers tr.on'); if (on) { const box = $('#tiers'); box.scrollTop = Math.max(0, on.offsetTop - box.clientHeight / 2); } }
+  const amt = v => `${sol(v)}${S.solUsd ? ' · ' + usd(v * S.solUsd) : ''}`;
   function setCard(c) { S.card = c; $('#cardBtn').disabled = !c; const xa = $('#cardX'); xa.setAttribute('aria-disabled', c ? 'false' : 'true'); xa.classList.toggle('off', !c);
     xa.href = c ? `https://x.com/intent/post?text=${encodeURIComponent(`a ${c.sizeTxt} SOL trade of $WORLD sends ${c.feeTxt} to World Central Kitchen.\n\nevery trade feeds the world.\n${location.origin}`)}` : '#';
     if (!c) $('#share').hidden = true; else if (!$('#share').hidden) drawCard(); }
   function calc() {
     const size = num($('#cSize').value), out = $('#cOut'), why = $('#cWhy');
-    const dim = (a, b, tiers) => { out.className = 'out dim'; out.textContent = a; why.textContent = b; if (tiers !== undefined) paintTiers(tiers); setCard(null); };
-    if ($('#cSize').value.trim() === '') return dim('type a trade size', "the fee is worked out exactly from pump.fun's published table.", venue === 'curve' ? 'curve' : null);
+    const dim = (a, b) => { out.className = 'out dim'; out.textContent = a; why.textContent = b; calc.last = 0; ['#sKit', '#sRay', '#sPump'].forEach(id => $(id).textContent = '—'); setCard(null); };
+    if ($('#cSize').value.trim() === '') return dim('type a trade size', '1% of every trade on the bonding curve goes to the kitchen.');
     if (!(size > 0)) return dim('that is not a trade size', 'use a positive number of SOL, like 0.5 or 2.');
     if (size > 1e6) return dim('that trade is bigger than the pool', 'try something under a million SOL.');
-    let rate, label, idx, where;
-    if (venue === 'curve') { rate = CURVE.creator; idx = 'curve'; where = 'on the bonding curve'; label = 'on the bonding curve the creator fee is a flat 0.3%'; }
-    else { const capUsd = num($('#cCap').value);
-      if ($('#cCap').value.trim() === '') return dim('add the market cap', 'PumpSwap fees depend on the market cap, in SOL.', null);
-      if (!(capUsd > 0)) return dim('that is not a market cap', 'use a positive number of dollars, like 250000.');
-      if (!S.solUsd) return dim('waiting for the SOL price', 'the tier is set in SOL, so the dollar figure needs a live SOL price.');
-      const capSol = capUsd / S.solUsd; idx = TIERS.findIndex(t => capSol >= t[0] && capSol < t[1]); const t = TIERS[idx]; rate = t[2]; where = `on PumpSwap at a $${Math.round(capUsd).toLocaleString('en-US')} market cap`;
-      label = `$${Math.round(capUsd).toLocaleString('en-US')} is ${Math.round(capSol).toLocaleString('en-US')} SOL of market cap at $${S.solUsd.toFixed(2)} a SOL, which is the ${t[1] === Infinity ? t[0].toLocaleString('en-US') + '+' : t[0].toLocaleString('en-US') + '–' + t[1].toLocaleString('en-US')} SOL tier: ${pct(rate)}`; }
-    const fee = size * rate / 100, feeUsd = S.solUsd ? fee * S.solUsd : null;
+    const fee = size * RATE.kitchen / 100;
     out.className = 'out'; const paint = v => { out.innerHTML = `${esc(sol(v))}${S.solUsd ? ` <em>≈ ${esc(usd(v * S.solUsd))}</em>` : ''}`; };
     const from = calc.last || 0; calc.last = fee; cancelAnimationFrame(calc.raf);
     if (RM || !from || Math.abs(from - fee) / fee > 50) paint(fee); else { const t0 = performance.now(); const f = now => { const p = clamp((now - t0) / 420, 0, 1); paint(p < 1 ? lerp(from, fee, eout(p)) : fee); if (p < 1) calc.raf = requestAnimationFrame(f); }; calc.raf = requestAnimationFrame(f); }
-    why.textContent = `${size.toLocaleString('en-US', { maximumFractionDigits: 6 })} SOL × ${pct(rate)} = ${fee.toFixed(9).replace(/0+$/, '').replace(/\.$/, '')} SOL to the kitchen. ${label}.`;
-    paintTiers(idx); say(out.textContent);
-    setCard({ sizeTxt: size.toLocaleString('en-US', { maximumFractionDigits: 6 }), feeTxt: sol(fee), feeUsd, rate: pct(rate), where }); }
-  $('#cSize').addEventListener('input', calc); $('#cCap').addEventListener('input', calc);
-  $('#cVenue').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; venue = b.dataset.v; $$('#cVenue button').forEach(x => x.classList.toggle('on', x === b)); $('#cCapRow').hidden = venue !== 'swap'; calc(); });
-  paintTiers('curve');
+    why.textContent = `${size.toLocaleString('en-US', { maximumFractionDigits: 6 })} SOL × 1% = ${fee.toFixed(9).replace(/0+$/, '').replace(/\.$/, '')} SOL to the kitchen, on the bonding curve. Raydium's 0.25% is on top.`;
+    $('#sKit').textContent = amt(fee); $('#sRay').textContent = amt(size * RATE.raydium / 100); $('#sPump').textContent = amt(size * RATE.pump / 100);
+    say(out.textContent);
+    setCard({ sizeTxt: size.toLocaleString('en-US', { maximumFractionDigits: 6 }), feeTxt: sol(fee), feeUsd: S.solUsd ? fee * S.solUsd : null, rate: '1%', where: 'on the bonding curve' }); }
+  $('#cSize').addEventListener('input', calc);
 
   // ---------------------------------------------------------------- the trade card: a picture of what one trade sends
   function sphereTo(ctx, cx, cy, R, cols, lon0, lat0, sun) { const cw = 2 * R / cols, fs = cw / .6, ch = fs * 1.18; ctx.font = `600 ${fs}px JB, ui-monospace, monospace`; ctx.textBaseline = 'alphabetic';
@@ -368,7 +409,7 @@
     x.fillStyle = C.ink; fit(`a ${c.sizeTxt} SOL trade sends`, '400 #px Fraunces, Georgia, serif', 600, 58); x.fillText(`a ${c.sizeTxt} SOL trade sends`, 60, 262);
     x.fillStyle = C.o; fit(c.feeTxt, 'italic 400 #px Fraunces, Georgia, serif', 610, 124); x.fillText(c.feeTxt, 58, 380);
     x.fillStyle = C.ink; fit('to World Central Kitchen.', '400 #px Fraunces, Georgia, serif', 600, 58); x.fillText('to World Central Kitchen.', 60, 456);
-    x.fillStyle = C.ink2; x.font = '400 18px DMM, monospace'; x.fillText(`${c.rate} creator fee ${c.where}`.slice(0, 64), 64, 520); x.fillText(`pump.fun's published rate${c.feeUsd != null ? ` · ≈ ${usd(c.feeUsd)} today` : ''}`, 64, 548);
+    x.fillStyle = C.ink2; x.font = '400 18px DMM, monospace'; x.fillText(`${c.rate} launchpad fee ${c.where}`.slice(0, 64), 64, 520); x.fillText(`$WORLD's own launchpad on Raydium${c.feeUsd != null ? ` · ≈ ${usd(c.feeUsd)} today` : ''}`, 64, 548);
     x.fillStyle = C.ink; x.font = '500 18px DMM, monospace'; x.fillText(location.host, 64, 620); x.fillStyle = C.mute; x.font = '400 16px DMM, monospace'; x.textAlign = 'right'; x.fillText(new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC', Wc - 48, 640); x.textAlign = 'left'; }
   $('#cardBtn').addEventListener('click', async () => { if (!S.card) return; $('#share').hidden = false; await drawCard();
     $('#cardCv').toBlob(b => { if (!b) return; const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'world-trade-card.png'; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast('card saved'); }, 'image/png'); });
@@ -378,21 +419,26 @@
   async function loadCfg() {
     try { const c = await jget('/api/x?a=cfg'); S.cfg = c; S.solUsd = c.sol || null; } catch { S.cfg = { ca: '', x: '', vault: '', cadence: 'daily' }; }
     const c = S.cfg, ss = $('#solSt');
-    $('#hSol').textContent = S.solUsd ? usd(S.solUsd) : '—';
     if (S.solUsd) { ss.className = 'st live'; ss.querySelector('span').textContent = `SOL ${usd(S.solUsd)} · live`; } else { ss.className = 'st off'; ss.querySelector('span').textContent = 'SOL price offline: the curve still works'; }
     if (c.ca) { $('#caTxt').textContent = c.ca; $('#caPill').hidden = false;
       $('#copyCa').addEventListener('click', () => navigator.clipboard.writeText(c.ca).then(() => toast('contract address copied'), () => toast('copy failed: select it by hand')));
-      const buy = `https://pump.fun/coin/${encodeURIComponent(c.ca)}`; for (const id of ['#navBuy', '#heroBuy']) { $(id).href = buy; $(id).hidden = false; } $('#heroRule').classList.remove('solid'); }
+      const buy = `https://raydium.io/launchpad/token/?mint=${encodeURIComponent(c.ca)}`; for (const id of ['#navBuy', '#heroBuy']) { $(id).href = buy; $(id).hidden = false; } $('#heroRule').classList.remove('solid'); }
     if (c.x) { const u = /^https?:/.test(c.x) ? c.x : `https://x.com/${c.x.replace(/^@/, '')}`; $('#navX').href = u; $('#navX').hidden = false; }
     const cad = c.cadence === 'hourly' ? 'every hour' : 'at least once a day'; $('#cadTxt').textContent = cad;
     $('#faqCad').textContent = `${cad[0].toUpperCase() + cad.slice(1)}, the whole balance minus a few cents of network fees. Small balances may wait until they're worth more than the cost of sending them.`;
     calc();
   }
+  async function loadRay() { const c = S.cfg || {}; if (!c.ca && !c.pad) return;
+    const [coin, pad] = await Promise.all([c.ca ? jget('/api/ray?a=coin', 15000).catch(() => null) : null, c.pad ? jget('/api/ray?a=pad', 15000).catch(() => null) : null]);
+    if (coin && coin.live && !coin.graduated) $('#nTrade').innerHTML = `${(coin.progress * 100).toFixed(1)}% of the way to graduation<small>${esc(coin.raisedSol.toFixed(2))} of ${esc(coin.raiseSol)} SOL raised on the curve · <a href="https://raydium.io/launchpad/token/?mint=${esc(coin.mint)}" target="_blank" rel="noopener">Raydium ↗</a></small>`;
+    if (coin && coin.live && coin.graduated) $('#nTrade').innerHTML = `graduated to a Raydium pool<small><a href="https://raydium.io/launchpad/token/?mint=${esc(coin.mint)}" target="_blank" rel="noopener">see it on Raydium ↗</a></small>`;
+    if (pad && pad.exists) { $('#padWait').hidden = false; $('#padWait').innerHTML = `<b>${esc(sol(pad.unclaimedSol))}</b> waiting in the launchpad's fee vault, ready to claim${S.solUsd ? ' · ' + esc(usd(pad.unclaimedSol * S.solUsd)) : ''} · launchpad <a href="https://solscan.io/account/${esc(pad.id)}" target="_blank" rel="noopener">${esc(short(pad.id))} ↗</a> · ${esc(pad.feePct)}% fee`; } }
   async function loadVault() {
+    loadRay();
     let v; try { v = await jget('/api/x?a=vault', 20000); } catch { return; }
     if (v.sol) { S.solUsd = v.sol; }
     if (v.coin && v.coin.listed) { $('#nTrade').innerHTML = `${esc(usd(v.coin.vol24))} traded in 24h<small>market cap ${esc(usd(v.coin.mcap))} · <a href="${esc(v.coin.url)}" target="_blank" rel="noopener">chart ↗</a></small>`; }
-    else if (v.coin && v.coin.listed === false) { $('#nTrade').innerHTML = `on the bonding curve<small><a href="https://pump.fun/coin/${esc(v.coin.ca)}" target="_blank" rel="noopener">see it on pump.fun ↗</a></small>`; }
+    else if (v.coin && v.coin.listed === false) { $('#nTrade').innerHTML = `on the bonding curve<small><a href="https://raydium.io/launchpad/token/?mint=${esc(v.coin.ca)}" target="_blank" rel="noopener">see it on Raydium ↗</a></small>`; }
     if (!v.open || !v.vault) return;
     const a = v.vault, rs = $('#routeSt'), ls = $('#ledgerSt');
     if (a.error) { rs.className = ls.className = 'st off'; rs.querySelector('span').textContent = ls.querySelector('span').textContent = a.error; return; }
@@ -437,8 +483,8 @@
   // ---------------------------------------------------------------- World Central Kitchen, from its own front page
   async function loadWck() {
     const st = $('#wSrc'); let w; try { w = await jget('/api/x?a=wck', 15000); } catch { w = { ok: false }; }
-    if (w.ok && w.meals) { const n = w.meals.n; countTo($('#wMeals'), n); $('#wUnit').textContent = ` ${w.meals.unit}+`; $('#hMeals').textContent = `${n.toLocaleString('en-US')}${w.meals.unit === 'million' ? 'M' : 'B'}+`; st.innerHTML = `read from <a href="https://wck.org" target="_blank" rel="noopener">wck.org ↗</a> ${esc(ago(w.at))}`; }
-    else { $('#wMeals').textContent = '—'; st.innerHTML = `wck.org did not answer just now · <a href="https://wck.org" target="_blank" rel="noopener">see it there ↗</a>`; $('#hMeals').textContent = '—'; }
+    if (w.ok && w.meals) { const n = w.meals.n; countTo($('#wMeals'), n); $('#wUnit').textContent = ` ${w.meals.unit}+`; st.innerHTML = `read from <a href="https://wck.org" target="_blank" rel="noopener">wck.org ↗</a> ${esc(ago(w.at))}`; }
+    else { $('#wMeals').textContent = '—'; st.innerHTML = `wck.org did not answer just now · <a href="https://wck.org" target="_blank" rel="noopener">see it there ↗</a>`; }
     const items = (w.ok && w.items) || [];
     $('#wItems').innerHTML = items.length ? items.map((it, i) => `<li style="--i:${i}"><span class="n">0${i + 1}</span><a href="${esc(it.url)}" target="_blank" rel="noopener">${esc(it.title)} ↗</a></li>`).join('') : `<li><span class="n">—</span><a href="https://wck.org/relief/" target="_blank" rel="noopener">WCK's responses are listed on wck.org ↗</a></li>`; }
 

@@ -8,12 +8,13 @@
 <meta name="theme-color" content="#f6f3ec">
 <meta property="og:title" content="WORLD — every trade feeds the world.">
 <meta property="og:description" content="Every creator fee $WORLD earns goes to World Central Kitchen. Every send is public, with its transaction.">
-<meta property="og:image" content="https://worldfeeds.vercel.app/og.png">
+<meta property="og:image" content="https://world-feeds.vercel.app/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://worldfeeds.vercel.app/og.png">
-<link rel="icon" href="/favicon.ico?v=468891" sizes="any">
-<link rel="icon" href="/favicon-32.png?v=468891" type="image/png" sizes="32x32">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=468891">
+<meta name="twitter:image" content="https://world-feeds.vercel.app/og.png">
+<link rel="icon" href="/favicon.ico?v=469172" sizes="any">
+<link rel="icon" href="/favicon-32.png?v=469172" type="image/png" sizes="32x32">
+<link rel="icon" href="/icon-512.png?v=469172" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=469172">
 <link rel="preload" href="/assets/fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/JB.woff2" as="font" type="font/woff2" crossorigin>
 <style>
@@ -226,6 +227,125 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
 /* footer: one line */
 .foot{border-top:1px solid var(--line);padding-top:26px;padding-bottom:34px;font-family:var(--mono);font-size:12px;color:var(--mute);text-align:center}
 
+/* ---- the intro: no words, just the Earth assembling */
+.introv{position:fixed;inset:0;z-index:80;background:var(--paper);cursor:default;display:none}
+html.intro .introv,.introv.run{display:block}
+.introv canvas{position:absolute;inset:0;width:100%;height:100%}
+.introv i{position:absolute;left:0;bottom:0;height:2px;width:0;background:var(--o)}
+html:not(.intro) .introv{pointer-events:none}
+html.intro body{overflow:hidden}
+.strip,.nav,.hero .wrap>div:first-child,.tape,.globe .cap{transition:opacity .9s ease}
+html.intro .strip,html.intro .nav,html.intro .hero .wrap>div:first-child,html.intro .tape,html.intro .globe .cap{opacity:0}
+html.intro #globeCv{visibility:hidden}
+
+/* ---- the planet today: the ink band */
+.planet{background:var(--ink);color:var(--paper);padding:34px 0 40px;position:relative;background-image:radial-gradient(rgba(239,234,223,.07) 1px,transparent 1.2px);background-size:7px 7px}
+.planet .pk{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#d9d3c4;margin-bottom:18px;flex-wrap:wrap}
+.planet .pk i{width:7px;height:7px;border-radius:50%;background:var(--g);animation:pulse 1.6s steps(2,end) infinite}
+.planet.off .pk i{background:var(--red);animation:none}
+.planet .pk span{margin-left:auto;text-transform:none;letter-spacing:.01em;color:#8b877c}
+.pgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid #3a3832}
+.pt{padding:22px 22px 2px;border-left:1px solid #3a3832}
+.pt:first-child{padding-left:0;border-left:0}
+.pt .n{font-family:var(--serif);font-weight:380;font-variation-settings:"opsz" 144;font-size:clamp(44px,4.8vw,72px);line-height:.95;letter-spacing:-.035em;color:#fff;font-feature-settings:"tnum"}
+.pt:last-child .n{color:var(--o)}
+.pt .k{font-family:var(--mono);font-size:11.5px;color:#d9d3c4;margin-top:12px;line-height:1.45}
+.pt .s{font-family:var(--mono);font-size:11px;color:#8b877c;margin-top:6px;line-height:1.5;overflow-wrap:anywhere}
+.pt .s a{color:#bdb6a6;text-decoration-color:#5a574f}
+
+/* ---- 04: the serious row, the scrollable map */
+.sev{margin:-14px 0 26px}
+.sevk{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin-bottom:12px;display:flex;gap:10px;align-items:center}
+.sevk i{width:7px;height:7px;border-radius:50%;background:var(--red)}
+.sevrow{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,292px);gap:12px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.sc{scroll-snap-align:start;border:1px solid var(--line2);background:#fbf9f4;border-radius:14px;padding:15px 16px 13px;display:flex;flex-direction:column;gap:7px;text-decoration:none;color:inherit;transition:border-color .2s,transform .2s,box-shadow .2s;min-height:196px}
+.sc:hover,.sc.hl{border-color:var(--ink);transform:translateY(-2px)}
+.sc .top{display:flex;align-items:center;justify-content:space-between}
+.sc .g{font-family:JB,var(--mono);font-weight:800;font-size:28px;line-height:1}
+.sc b{font-family:var(--serif);font-weight:500;font-size:19px;line-height:1.18;letter-spacing:-.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sc small{font-family:var(--mono);font-size:11.5px;color:var(--ink2);line-height:1.45}
+.sc small.cty{color:var(--mute);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sc .when{margin-top:auto;padding-top:8px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:11px;color:var(--mute)}
+.sc .when .act{color:var(--red)}
+.sc .lv,.alerts .lv{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:999px;border:1px solid}
+.sc .lv.red{color:var(--red)}.sc .lv.orange{color:var(--o2)}.sc .lv.green{color:var(--g)}
+.mapin{position:relative;width:100%}
+.map{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain}
+.map::-webkit-scrollbar{display:none}
+.legend .lg{display:inline-block;width:10px;height:10px}
+.lg.sun{border-radius:50%;background:var(--o);box-shadow:0 0 0 2px #fbf9f4,0 0 0 3px var(--o)}
+.lg.dusk{background:repeating-linear-gradient(90deg,var(--o) 0 2px,transparent 2px 4px);height:6px!important}
+.lg.night{background:radial-gradient(var(--ink2) 1px,transparent 1.3px) 0 0/4px 4px;opacity:.7}
+.lg.city{background:var(--o);width:8px!important;height:8px!important}
+
+/* ---- 03: the trade card */
+.shr{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.shr .btn{padding:11px 16px;font-size:12.5px}
+.shr .btn[disabled],.shr .btn.off{opacity:.38;cursor:not-allowed;transform:none}
+.shr .btn[disabled]:hover,.shr .btn.off:hover{background:transparent;color:var(--ink)}
+.share{margin-top:16px;border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:#fbf9f4}
+.share canvas{display:block;width:100%;height:auto}
+
+/* ---- hero facts */
+.facts{display:grid;grid-template-columns:repeat(4,auto);justify-content:start;gap:0;margin:34px 0 0;padding:0;border-top:1px solid var(--line2);width:max-content;max-width:100%}
+.facts div{padding:12px 20px 0 0;margin-right:20px;border-right:1px solid var(--line)}
+.facts div:last-child{border-right:0;margin-right:0}
+.facts dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.facts dd{margin:4px 0 0;font-family:var(--serif);font-size:24px;letter-spacing:-.015em;line-height:1.1;font-feature-settings:"tnum"}
+.facts dd.o{color:var(--o)}
+.facts div{opacity:0;transform:translateY(10px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.hero.go .facts div{opacity:1;transform:none}
+.hero.go .facts div:nth-child(1){transition-delay:.75s}.hero.go .facts div:nth-child(2){transition-delay:.85s}.hero.go .facts div:nth-child(3){transition-delay:.95s}.hero.go .facts div:nth-child(4){transition-delay:1.05s}
+
+/* ---- the seismograph */
+.seis{position:relative;margin-top:26px;border-top:1px solid #3a3832;padding-top:16px}
+.seis canvas{display:block;width:100%;height:96px}
+.seis .sx{display:flex;justify-content:space-between;gap:12px;font-family:var(--mono);font-size:11px;color:#8b877c;margin-top:6px}
+.seis .sx b{font-weight:400;color:#d9d3c4}
+.seis .gtip{background:var(--paper);color:var(--ink)}
+
+/* ---- the kitchen, live from wck.org */
+.wckl{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:56px;margin-top:64px;padding-top:30px;border-top:1px solid var(--ink)}
+.wckl .k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:10px}
+.wckl .big{font-family:var(--serif);font-weight:380;font-variation-settings:"opsz" 144;font-size:clamp(64px,8vw,120px);line-height:.9;letter-spacing:-.04em;font-feature-settings:"tnum"}
+.wckl .big em{font-style:italic;color:var(--o);font-size:.42em;letter-spacing:-.02em;margin-left:.1em}
+.wckl .s{font-family:var(--mono);font-size:12px;color:var(--ink2);margin-top:12px}
+.wckl ol{list-style:none;margin:0;padding:0;border-top:1px solid var(--line2)}
+.wckl li{display:grid;grid-template-columns:40px minmax(0,1fr);gap:8px;border-bottom:1px solid var(--line2);padding:15px 0;opacity:0;transform:translateX(-10px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0)*110ms + 200ms)}
+.plate.vis .wckl li{opacity:1;transform:none}
+.wckl li .n{font-family:var(--mono);font-size:12px;color:var(--o2);padding-top:4px}
+.wckl li a{font-family:var(--serif);font-size:clamp(19px,1.7vw,23px);line-height:1.25;letter-spacing:-.01em;text-decoration:none}
+.wckl li a:hover{color:var(--o2)}
+.wckl .more{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--ink2)}
+
+/* ---- motion: headings rise word by word, plate lines draw in, pieces arrive in order */
+.plate{border-top:0}
+.plate:before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--line);transform:scaleX(0);transform-origin:0 50%;transition:transform 1.3s cubic-bezier(.7,0,.2,1)}
+.plate.vis:before{transform:none}
+.plate h2 .hw{display:inline-block;opacity:0;transform:translateY(.45em) rotate(1.5deg);transition:opacity .8s ease,transform .9s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i)*60ms + 120ms)}
+.plate.vis h2 .hw{opacity:1;transform:none}
+.eyebrow b{display:inline-block;transform:translateY(6px);opacity:0;transition:all .6s ease .05s}
+.plate.vis .eyebrow b{transform:none;opacity:1}
+.route .node,.clauses li,.vstat>div,.kitchen .card,.calc>div,.pt{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.plate.vis .route .node,.plate.vis .clauses li,.plate.vis .vstat>div,.plate.vis .kitchen .card,.plate.vis .calc>div,.planet.vis .pt{opacity:1;transform:none}
+.route .node:nth-child(3),.clauses li:nth-child(2),.vstat>div:nth-child(2),.calc>div:nth-child(2),.pt:nth-child(2){transition-delay:.12s}
+.route .node:nth-child(4),.clauses li:nth-child(3),.vstat>div:nth-child(3),.pt:nth-child(3){transition-delay:.24s}
+.route .node:nth-child(5),.clauses li:nth-child(4),.vstat>div:nth-child(4),.pt:nth-child(4){transition-delay:.36s}
+.route .node:nth-child(6),.pt:nth-child(5){transition-delay:.48s}
+.route .node .dot{transition:background .3s,color .3s,border-color .3s}
+.route .node:hover .dot{background:var(--ink);color:var(--paper)}
+.faq details[open] p{animation:fu .45s cubic-bezier(.2,.7,.2,1)}
+@keyframes fu{from{opacity:0;transform:translateY(-6px)}}
+.sc{opacity:0;transform:translateY(14px);animation:fu2 .7s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i,0)*70ms)}
+@keyframes fu2{to{opacity:1;transform:none}}
+
+/* ---- the reading line, the phone menu */
+.prog{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--o);transform:scaleX(0);transform-origin:0 50%;pointer-events:none}
+.menu{display:none;font-family:var(--mono);font-size:12.5px;border:1px solid var(--ink);background:transparent;color:var(--ink);border-radius:999px;padding:9px 16px;cursor:pointer;min-height:40px}
+.sheet{position:fixed;left:0;right:0;top:54px;max-height:calc(100vh - 54px);overflow:auto;z-index:19;background:var(--paper);border-bottom:1px solid var(--line);padding:8px var(--gut) 18px;display:grid;animation:fu .3s ease}
+.sheet a{font-family:var(--serif);font-size:26px;letter-spacing:-.01em;text-decoration:none;padding:10px 0;border-bottom:1px solid var(--line)}
+.sheet a span{font-family:var(--mono);font-size:12px;color:var(--o2);margin-right:14px;vertical-align:4px}
+
 /* reveal */
 .rv{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
 .rv.vis{opacity:1;transform:none}
@@ -235,6 +355,8 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
 @media (max-width:1000px){
   .nav .links{display:none}
   .nav .wrap{grid-template-columns:1fr auto}
+  .menu{display:inline-flex;align-items:center}
+  .wckl{grid-template-columns:minmax(0,1fr);gap:30px;margin-top:48px}
   .hero .wrap{grid-template-columns:minmax(0,1fr);min-height:0;padding-top:34px;gap:16px}
   .globe{max-width:520px}
   .rule,.calc,.kitchen{grid-template-columns:minmax(0,1fr);gap:36px}
@@ -247,6 +369,12 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
   .vstat{grid-template-columns:repeat(2,minmax(0,1fr))}
   .vstat div:nth-child(2){border-right:0}
   .vstat div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .pgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pt{padding:18px 16px 14px;border-left:0;border-bottom:1px solid #3a3832}
+  .pt:nth-child(2n){border-left:1px solid #3a3832}
+  .pt:nth-child(2n+1){padding-left:0}
+  .pt:last-child{grid-column:1/-1;border-bottom:0;padding-left:0}
+  .pt:last-child{border-left:0}
 }
 @media (max-width:640px){
   :root{--gut:20px}
@@ -261,11 +389,20 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
   .ledger th:nth-child(3),.ledger td:nth-child(3){display:none}
   .eyebrow{flex-wrap:wrap;gap:6px 14px}
   .eyebrow .st{margin-left:0;width:100%}
+  .mapin{width:900px}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr));width:auto}
+  .facts div{margin-right:0;padding-right:12px;border-right:0}
+  .facts div:nth-child(-n+2){border-bottom:1px solid var(--line);padding-bottom:12px}
+  .facts dt{white-space:normal}
+  .planet .pk span{margin-left:0;width:100%}
+  .sevrow{grid-auto-columns:minmax(240px,82%)}
 }
-@media (prefers-reduced-motion:reduce){.tapein,.flow i{animation:none}.rv,.hero h1 .w{transition:none;opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.tapein,.flow i,.planet .pk i,.sc{animation:none}.sc,.plate h2 .hw,.eyebrow b,.route .node,.clauses li,.vstat>div,.kitchen .card,.calc>div,.pt,.facts div,.wckl li{opacity:1!important;transform:none!important;transition:none!important}.plate:before{transform:none;transition:none}.rv,.hero h1 .w{transition:none;opacity:1;transform:none}}
 </style>
 </head>
 <body>
+<script>(function(){try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!location.hash&&!/nointro/.test(location.search))document.documentElement.classList.add('intro')}catch(e){}})()</script>
+<div class="introv" id="intro" aria-hidden="true"><canvas id="introCv"></canvas><i id="introBar"></i></div>
 <canvas id="ground" aria-hidden="true"></canvas>
 
 <div class="strip" id="strip"><div class="wrap"><i></i><span id="stripTxt">$WORLD does not exist yet. Anyone posting a contract address before it appears on this page is scamming you.</span></div></div>
@@ -276,9 +413,11 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
     <nav class="links" id="links" aria-label="Sections">
       <a href="#rule">the rule</a><a href="#route">the route</a><a href="#calculator">calculator</a><a href="#world">world now</a><a href="#kitchen">the kitchen</a><a href="#ledger">ledger</a><a href="#faq">faq</a>
     </nav>
-    <div class="right"><a class="pill" id="navX" href="#" target="_blank" rel="noopener" hidden>𝕏</a><a class="pill solid" id="navBuy" href="#" target="_blank" rel="noopener" hidden>buy $WORLD</a></div>
+    <div class="right"><a class="pill" id="navX" href="#" target="_blank" rel="noopener" hidden>𝕏</a><a class="pill solid" id="navBuy" href="#" target="_blank" rel="noopener" hidden>buy $WORLD</a><button class="menu" id="menuBtn" type="button" aria-expanded="false" aria-controls="sheet">menu</button></div>
   </div>
+  <i class="prog" id="prog" aria-hidden="true"></i>
 </header>
+<nav class="sheet" id="sheet" aria-label="Sections" hidden><a href="#rule"><span>01</span>the rule</a><a href="#route"><span>02</span>the route</a><a href="#calculator"><span>03</span>calculator</a><a href="#world"><span>04</span>world now</a><a href="#kitchen"><span>05</span>the kitchen</a><a href="#ledger"><span>06</span>ledger</a><a href="#faq"><span>07</span>faq</a></nav>
 
 <main>
 <section class="hero" id="top">
@@ -291,6 +430,12 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
         <a class="btn solid" id="heroRule" href="#rule">read the rule ↓</a>
         <a class="btn" href="#world">see the world right now ↓</a>
       </div>
+      <dl class="facts" id="facts">
+        <div><dt>creator fee to WCK</dt><dd class="o">100%</dd></div>
+        <div><dt>per curve trade</dt><dd>0.30%</dd></div>
+        <div><dt>SOL price</dt><dd id="hSol">—</dd></div>
+        <div><dt>WCK meals served</dt><dd id="hMeals">—</dd></div>
+      </dl>
     </div>
     <div class="globe" id="globe" aria-label="A live globe of the Earth, drawn in characters">
       <canvas id="globeCv"></canvas>
@@ -304,6 +449,21 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
   <div class="lead" id="tapeLead">it's mealtime in <b id="mealN">—</b> cities right now</div>
   <div class="tapein" id="tape"></div>
 </div>
+
+<section class="planet rv" id="planet" aria-label="The planet today">
+  <div class="wrap">
+    <div class="pk"><i></i>the planet today <span id="planetSt">reading GDACS and USGS…</span></div>
+    <div class="pgrid">
+      <div class="pt"><div class="n" id="pQuakes">—</div><div class="k">earthquakes, M2.5+, last 24 hours</div><div class="s" id="pQuakesS"></div></div>
+      <div class="pt"><div class="n" id="pCyc">—</div><div class="k">tropical cyclones spinning now</div><div class="s" id="pCycS"></div></div>
+      <div class="pt"><div class="n" id="pCountries">—</div><div class="k">countries under an orange or red alert</div><div class="s" id="pCountriesS"></div></div>
+      <div class="pt"><div class="n" id="pSerious">—</div><div class="k">red and orange alerts, last 30 days</div><div class="s" id="pSeriousS"></div></div>
+      <div class="pt"><div class="n" id="pMeal">—</div><div class="k">of 48 cities sitting down to eat</div><div class="s">breakfast, lunch or dinner, local time</div></div>
+    </div>
+    <div class="seis" id="seis"><canvas id="seisCv" aria-label="Every earthquake of magnitude 2.5 or more in the last 24 hours, drawn as a seismograph"></canvas><div class="gtip" id="stip"></div>
+      <div class="sx"><span>24 h ago</span><span><b>the last 24 hours, as a seismograph</b> · <span id="seisN">reading USGS…</span></span><span>now</span></div></div>
+  </div>
+</section>
 
 <section class="plate rv" id="rule">
   <div class="wrap">
@@ -358,6 +518,8 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
         <div class="res">
           <div class="out dim" id="cOut">type a trade size</div>
           <div class="why" id="cWhy">the fee is worked out exactly from pump.fun's published table.</div>
+          <div class="shr"><button class="btn" id="cardBtn" type="button" disabled>make a card ↓</button><a class="btn off" id="cardX" href="#" target="_blank" rel="noopener" aria-disabled="true">post on 𝕏 ↗</a></div>
+          <div class="share" id="share" hidden><canvas id="cardCv" width="1200" height="675" aria-label="Your trade card"></canvas></div>
         </div>
       </div>
       <div>
@@ -372,15 +534,16 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
   <div class="wrap">
     <div class="eyebrow"><b>04</b> the world right now <span class="st" id="worldSt"><i></i><span>reading GDACS…</span></span></div>
     <h2>where the ground shook, flooded <em>or burned</em> this week.</h2>
+    <div class="sev" id="sev" hidden><div class="sevk"><i></i>red and orange · last 30 days</div><div class="sevrow" id="sevRow"></div></div>
   </div>
-  <div class="map" id="map"><canvas id="mapCv"></canvas><div class="gtip" id="mtip"></div></div>
+  <div class="map" id="map"><div class="mapin" id="mapIn"><canvas id="mapCv"></canvas><div class="gtip" id="mtip"></div></div></div>
   <div class="wrap">
-    <div class="legend"><span><i style="background:var(--red)"></i>red alert</span><span><i style="background:var(--o)"></i>orange alert</span><span><i style="background:var(--g)"></i>green alert</span><span class="mono" id="srcLine"></span></div>
+    <div class="legend"><span><i style="background:var(--red)"></i>red alert</span><span><i style="background:var(--o)"></i>orange alert</span><span><i style="background:var(--g)"></i>green alert</span><span><b class="lg sun"></b>the sun, overhead</span><span><b class="lg dusk"></b>sunrise and sunset</span><span><b class="lg night"></b>night</span><span><b class="lg city"></b>a city at mealtime</span><span class="mono" id="srcLine"></span></div>
     <div class="chips" id="chips"></div>
     <ul class="alerts" id="alerts"></ul>
     <div class="empty" id="worldOff" hidden><i></i><span id="worldOffTxt">The alert feed did not answer.</span><button class="btn" id="worldRetry" type="button">retry ↻</button></div>
     <button class="btn more" id="moreBtn" type="button" hidden>show all</button>
-    <p class="note" style="margin-top:22px">Alerts from <a href="https://www.gdacs.org" target="_blank" rel="noopener">GDACS ↗</a>, the Global Disaster Alert and Coordination System run by the United Nations and the European Commission. Refreshed every ten minutes. These are alerts, not WCK deployments.</p>
+    <p class="note" style="margin-top:22px">Alerts from <a href="https://www.gdacs.org" target="_blank" rel="noopener">GDACS ↗</a> (UN and European Commission) and <a href="https://earthquake.usgs.gov" target="_blank" rel="noopener">USGS ↗</a>, every ten minutes. Day and night from the sun's real position. Alerts, not WCK deployments.</p>
   </div>
 </section>
 
@@ -405,6 +568,10 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
         <div class="cta"><a class="btn solid" href="https://thegivingblock.com/donate/world-central-kitchen/" target="_blank" rel="noopener">give to WCK directly ↗</a><a class="btn" href="https://wck.org" target="_blank" rel="noopener">wck.org ↗</a></div>
       </div>
     </div>
+    <div class="wckl" id="wckLive">
+      <div><div class="k">meals WCK says it has served</div><div class="big"><span id="wMeals">—</span><em id="wUnit"></em></div><div class="s" id="wSrc">reading wck.org…</div></div>
+      <div><div class="k">WCK's latest responses</div><ol id="wItems"></ol><a class="more" href="https://wck.org/relief/" target="_blank" rel="noopener">every response on wck.org ↗</a></div>
+    </div>
   </div>
 </section>
 
@@ -412,18 +579,14 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
   <div class="wrap">
     <div class="eyebrow"><b>06</b> the ledger <span class="st" id="ledgerSt"><i></i><span>waiting for launch</span></span></div>
     <h2>every send, <em>with its transaction.</em></h2>
-    <div id="ledgerClosed">
-      <p class="closed">The vault opens at launch. Its address will appear here and on our 𝕏 in the same minute, and every SOL that leaves it will be listed below with its transaction and its receipt.</p>
-      <p class="note">This page reads the vault straight from Solana. There is nothing to type in and nothing to trust: a send is either on-chain or it isn't.</p>
-    </div>
-    <div id="ledgerOpen" hidden>
+    <div id="ledgerOpen">
       <div class="vstat">
-        <div><div class="k">in the vault now</div><div class="n" id="lBal">—</div></div>
-        <div><div class="k">sent to WCK</div><div class="n" id="lOut">—</div></div>
-        <div><div class="k">sends</div><div class="n" id="lCount">—</div></div>
-        <div><div class="k">fees collected</div><div class="n" id="lIn">—</div></div>
+        <div><div class="k">in the vault now</div><div class="n" id="lBal">—<small>opens at launch</small></div></div>
+        <div><div class="k">sent to WCK</div><div class="n" id="lOut">—<small>nothing sent yet</small></div></div>
+        <div><div class="k">sends</div><div class="n" id="lCount">0<small>none yet</small></div></div>
+        <div><div class="k">fees collected</div><div class="n" id="lIn">—<small>read from Solana</small></div></div>
       </div>
-      <table class="ledger"><thead><tr><th>when</th><th>sent</th><th>to</th><th>proof</th></tr></thead><tbody id="lRows"></tbody></table>
+      <table class="ledger"><thead><tr><th>when</th><th>sent</th><th>to</th><th>proof</th></tr></thead><tbody id="lRows"><tr><td colspan="4">No sends yet. The vault's address goes up here and on our 𝕏 at launch, and every send is listed with its transaction.</td></tr></tbody></table>
       <p class="note" id="lNote" style="margin-top:14px"></p>
     </div>
   </div>
@@ -451,7 +614,7 @@ h3{font-family:var(--serif);font-weight:500;font-size:clamp(21px,2vw,26px);lette
 <div class="toast" id="toast" role="status"></div>
 <span class="sr" aria-live="polite" id="live"></span>
 
-<script src="/assets/land.js?v=468891"></script>
-<script src="/assets/app.js?v=468891"></script>
+<script src="/assets/land.js?v=469172"></script>
+<script src="/assets/app.js?v=469172"></script>
 </body>
 </html>

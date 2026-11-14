@@ -4,17 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>WORLD</title>
-<meta name="description" content="$WORLD is a memecoin on Solana with one rule: every creator fee it earns goes to World Central Kitchen. Every send is public.">
+<meta name="description" content="$WORLD launches on its own Raydium launchpad. Its 1% fee on every trade goes to World Central Kitchen, and every send is public.">
 <meta name="theme-color" content="#f6f3ec">
 <meta property="og:title" content="WORLD — every trade feeds the world.">
-<meta property="og:description" content="Every creator fee $WORLD earns goes to World Central Kitchen. Every send is public, with its transaction.">
+<meta property="og:description" content="1% of every $WORLD trade goes to World Central Kitchen. Every send is public, with its transaction.">
 <meta property="og:image" content="https://world-feeds.vercel.app/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://world-feeds.vercel.app/og.png">
-<link rel="icon" href="/favicon.ico?v=469240" sizes="any">
-<link rel="icon" href="/favicon-32.png?v=469240" type="image/png" sizes="32x32">
-<link rel="icon" href="/icon-512.png?v=469240" type="image/png" sizes="512x512">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=469240">
+<link rel="icon" href="/favicon.ico?v=469303" sizes="any">
+<link rel="icon" href="/favicon-32.png?v=469303" type="image/png" sizes="32x32">
+<link rel="icon" href="/icon-512.png?v=469303" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=469303">
 <link rel="preload" href="/assets/fonts/Fraunces.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/JB.woff2" as="font" type="font/woff2" crossorigin>
 <style>
@@ -286,16 +286,6 @@ html.intro #globeCv{visibility:hidden}
 .share{margin-top:16px;border:1px solid var(--line2);border-radius:12px;overflow:hidden;background:#fbf9f4}
 .share canvas{display:block;width:100%;height:auto}
 
-/* ---- hero facts */
-.facts{display:grid;grid-template-columns:repeat(4,auto);justify-content:start;gap:0;margin:34px 0 0;padding:0;border-top:1px solid var(--line2);width:max-content;max-width:100%}
-.facts div{padding:12px 20px 0 0;margin-right:20px;border-right:1px solid var(--line)}
-.facts div:last-child{border-right:0;margin-right:0}
-.facts dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
-.facts dd{margin:4px 0 0;font-family:var(--serif);font-size:24px;letter-spacing:-.015em;line-height:1.1;font-feature-settings:"tnum"}
-.facts dd.o{color:var(--o)}
-.facts div{opacity:0;transform:translateY(10px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
-.hero.go .facts div{opacity:1;transform:none}
-.hero.go .facts div:nth-child(1){transition-delay:.75s}.hero.go .facts div:nth-child(2){transition-delay:.85s}.hero.go .facts div:nth-child(3){transition-delay:.95s}.hero.go .facts div:nth-child(4){transition-delay:1.05s}
 
 /* ---- the seismograph */
 .seis{position:relative;margin-top:26px;border-top:1px solid #3a3832;padding-top:16px}
@@ -374,6 +364,61 @@ html.intro #globeCv{visibility:hidden}
 .mqin i{font-family:JB,var(--mono);font-style:normal;font-weight:800;font-size:clamp(40px,6vw,92px);color:var(--o);display:inline-block;padding:0 .3em}
 .btn,.pill{will-change:transform}
 
+.split{border:1px solid var(--line2);border-radius:14px;background:#fbf9f4;padding:20px 20px 8px}
+.split .sk{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
+.srow{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 54px 96px;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.srow .lb{font-size:14.5px;color:var(--ink)}
+.srow.k3 .lb{color:var(--ink2);font-size:13.5px}
+.srow .bar{height:10px;background:#efeadf;border-radius:99px;overflow:hidden}
+.srow .bar i{display:block;height:100%;width:var(--w);background:var(--o);border-radius:99px;transform:scaleX(0);transform-origin:0 50%;transition:transform 1.2s cubic-bezier(.2,.7,.2,1) .3s}
+.srow.k2 .bar i{background:var(--ink2)}.srow.k3 .bar i{background:repeating-linear-gradient(90deg,#bdb6a6 0 3px,transparent 3px 6px)}
+.plate.vis .srow .bar i{transform:none}
+.srow .pc{font-family:var(--mono);font-size:13px;text-align:right}
+.srow.k1 .pc{color:var(--o2)}
+.srow .am{font-family:var(--mono);font-size:12px;color:var(--ink2);text-align:right;white-space:nowrap}
+.split .note{margin:14px 0 12px}
+
+/* ---- 04, the full picture */
+.wstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin:-8px 0 30px}
+.wt{appearance:none;text-align:left;font:inherit;color:inherit;border:1px solid var(--line2);background:#fbf9f4;border-radius:14px;padding:13px 14px 12px;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:end;transition:border-color .2s,background .2s,transform .2s;opacity:0;transform:translateY(12px);animation:fu2 .6s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i,0)*60ms)}
+.wt:hover{border-color:var(--ink);transform:translateY(-2px)}
+.wt.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.wt .g{font-family:JB,var(--mono);font-weight:800;font-size:24px;line-height:1;grid-row:1/3}
+.wt .n{font-family:var(--serif);font-size:30px;line-height:1;letter-spacing:-.02em;font-feature-settings:"tnum"}
+.wt .l{font-family:var(--mono);font-size:11px;color:var(--ink2);letter-spacing:.02em}
+.wt.on .l{color:#d9d3c4}
+.wt .lv3{grid-column:1/-1;display:flex;height:4px;border-radius:9px;overflow:hidden;background:#efeadf;margin-top:9px}
+.wt .lv3 i{display:block;height:100%}
+.w2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:22px;margin:6px 0 38px}
+.spot{border:1px solid var(--ink);border-radius:16px;background:#fbf9f4;overflow:hidden;display:grid;grid-template-rows:auto auto 1fr}
+.spk{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--paper);background:var(--ink);padding:9px 14px;display:flex;align-items:center;gap:8px}
+.spk:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--red);animation:pulse 1.4s steps(2,end) infinite}
+.spg{position:relative;border-bottom:1px solid var(--line2)}
+.spg canvas{display:block;width:100%;height:250px}
+.spi{padding:14px 16px 16px;display:grid;gap:6px}
+.spi b{font-family:var(--serif);font-weight:500;font-size:22px;line-height:1.15;letter-spacing:-.01em}
+.spi .row{display:flex;flex-wrap:wrap;gap:6px 16px;font-family:var(--mono);font-size:12px;color:var(--ink2)}
+.spi .row span b{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--ink)}
+.spi a{font-family:var(--mono);font-size:12px;color:var(--ink)}
+.w2r{display:grid;gap:22px;align-content:start}
+.tl,.ctry{border:1px solid var(--line2);border-radius:16px;background:#fbf9f4;padding:14px 16px}
+.tlk,.ck,.lhead{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);margin-bottom:10px}
+.tlb{position:relative}
+.tl canvas{display:block;width:100%;height:150px}
+.tlx{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--mute);margin-top:4px}
+.ctry ol{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.ctry li{display:grid;grid-template-columns:minmax(0,1fr) 1.1fr 28px;gap:10px;align-items:center;font-size:13.5px}
+.ctry li span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctry .bar{height:8px;background:#efeadf;border-radius:9px;overflow:hidden}
+.ctry .bar i{display:block;height:100%;background:var(--o);border-radius:9px;transform:scaleX(0);transform-origin:0 50%;transition:transform 1s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0)*70ms + 150ms)}
+.plate.vis .ctry .bar i{transform:scaleX(var(--w))}
+.ctry li b{font-family:var(--mono);font-weight:500;font-size:12px;text-align:right}
+.lhead{display:flex;justify-content:space-between;margin:0 0 8px}
+.alerts li{cursor:pointer}
+.alerts li .more{grid-column:2/-1;display:none;font-family:var(--mono);font-size:12px;color:var(--ink2);line-height:1.7;padding:6px 0 4px}
+.alerts li.open .more{display:block;animation:fu .35s ease}
+.alerts li .more a{color:var(--ink)}
+
 /* reveal */
 .rv{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
 .rv.vis{opacity:1;transform:none}
@@ -395,6 +440,7 @@ html.intro #globeCv{visibility:hidden}
   .node{padding-top:0;padding-left:48px;padding-bottom:26px}
   .node .dot{top:0}
   .vstat{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .w2{grid-template-columns:minmax(0,1fr)}
   .vstat div:nth-child(2){border-right:0}
   .vstat div:nth-child(-n+2){border-bottom:1px solid var(--line)}
   .pgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -418,16 +464,19 @@ html.intro #globeCv{visibility:hidden}
   .eyebrow{flex-wrap:wrap;gap:6px 14px}
   .eyebrow .st{margin-left:0;width:100%}
   .mapin{width:900px}
+  .wstats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .wt{padding:10px 10px 9px;gap:2px 7px}
+  .wt .n{font-size:24px}
+  .wt .g{font-size:19px}
+  .wt .l{font-size:10px}
+  .srow{grid-template-columns:minmax(0,1fr) 54px 84px}
+  .srow .bar{grid-column:1/-1;order:3}
   .bignum{top:22px;font-size:120px}
   .ca code{max-width:52vw}
-  .facts{grid-template-columns:repeat(2,minmax(0,1fr));width:auto}
-  .facts div{margin-right:0;padding-right:12px;border-right:0}
-  .facts div:nth-child(-n+2){border-bottom:1px solid var(--line);padding-bottom:12px}
-  .facts dt{white-space:normal}
   .planet .pk span{margin-left:0;width:100%}
   .sevrow{grid-auto-columns:minmax(240px,82%)}
 }
-@media (prefers-reduced-motion:reduce){.plate.vis .route .node .dot{animation:none!important}.rule .big .sw{color:inherit}.tapein,.flow i,.planet .pk i,.sc{animation:none}.sc,.plate h2 .hw,.eyebrow b,.route .node,.clauses li,.vstat>div,.kitchen .card,.calc>div,.pt,.facts div,.wckl li{opacity:1!important;transform:none!important;transition:none!important}.plate:before{transform:none;transition:none}.rv,.hero h1 .w{transition:none;opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.wt{animation:none;opacity:1;transform:none}.ctry .bar i{transform:scaleX(var(--w))!important;transition:none}.plate.vis .route .node .dot{animation:none!important}.rule .big .sw{color:inherit}.tapein,.flow i,.planet .pk i,.sc{animation:none}.sc,.plate h2 .hw,.eyebrow b,.route .node,.clauses li,.vstat>div,.kitchen .card,.calc>div,.pt,.wckl li{opacity:1!important;transform:none!important;transition:none!important}.plate:before{transform:none;transition:none}.rv,.hero h1 .w{transition:none;opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -454,17 +503,11 @@ html.intro #globeCv{visibility:hidden}
       <h1 id="h1"><span class="w">every</span> <span class="w">trade</span><br><span class="w">feeds</span> <span class="w">the</span> <span class="w"><em>world.</em></span></h1>
       <p class="lead">The fees don't go to us. They go to <b>World Central Kitchen</b>, the chefs who cook wherever disaster hits.</p>
       <div class="cta">
-        <a class="btn solid" id="heroBuy" href="#" target="_blank" rel="noopener" hidden>buy on pump.fun ↗</a>
+        <a class="btn solid" id="heroBuy" href="#" target="_blank" rel="noopener" hidden>buy on Raydium ↗</a>
         <a class="btn solid" id="heroRule" href="#rule">read the rule ↓</a>
         <a class="btn" href="#world">see the world right now ↓</a>
       </div>
       <div class="ca" id="caPill" hidden><span class="k">CA</span><code id="caTxt"></code><button type="button" id="copyCa">copy</button></div>
-      <dl class="facts" id="facts">
-        <div><dt>creator fee to WCK</dt><dd class="o">100%</dd></div>
-        <div><dt>per curve trade</dt><dd>0.30%</dd></div>
-        <div><dt>SOL price</dt><dd id="hSol">—</dd></div>
-        <div><dt>WCK meals served</dt><dd id="hMeals">—</dd></div>
-      </dl>
     </div>
     <div class="globe" id="globe" aria-label="A live globe of the Earth, drawn in characters">
       <canvas id="globeCv"></canvas>
@@ -499,15 +542,15 @@ html.intro #globeCv{visibility:hidden}
     <div class="eyebrow"><b>01</b> the rule</div>
     <h2>one rule. <em>all</em> of it goes to the kitchen.</h2>
     <div class="rule">
-      <p class="big">pump.fun pays a coin's creator a cut of every trade. on $WORLD, that cut is not ours. <em>it belongs to the kitchen,</em> and you can watch it get there.</p>
+      <p class="big">$WORLD has its own launchpad on Raydium, and the launchpad takes 1% of every trade. that 1% is not ours. <em>it belongs to the kitchen,</em> and you can watch it get there.</p>
       <ol class="clauses">
-        <li><span class="n">01.1</span><div><h3>every creator fee lands in one public wallet.</h3><p>The creator fee is 0.30% of every trade on the bonding curve, and between 0.05% and 0.95% after the coin graduates to PumpSwap, set by pump.fun's fee table. It is collected in SOL and claimed into the vault, a wallet that exists only for this.</p></div></li>
+        <li><span class="n">01.1</span><div><h3>every fee lands in one public wallet.</h3><p>$WORLD launches on its own Raydium LaunchLab launchpad, set to a 1% fee on every trade on the bonding curve. Raydium adds its own 0.25% on top. The 1% is collected in SOL and claimed into the vault, a wallet that exists only for this. When the coin graduates to a Raydium pool, half of its liquidity is burned and the other half stays with the launchpad as a fee key, so its share of the pool's trading fees goes the same way.</p></div></li>
         <li><span class="n">01.2</span><div><h3>everything in the vault goes to World Central Kitchen.</h3><p>Through WCK's own crypto donation page on The Giving Block, <span id="cadTxt">at least once a day</span>. No middle wallet, no team share, no "we'll donate later".</p></div></li>
         <li><span class="n">01.3</span><div><h3>every send is public.</h3><p>Each SOL that leaves the vault appears in <a href="#ledger">plate 06</a> with its transaction, read straight from Solana. Nothing counts as given until it has left.</p></div></li>
         <li><span class="n">01.4</span><div><h3>a person presses send.</h3><p>Claiming the fees and donating them is done by hand, from the dev wallet. Here is what that person could get wrong, and where you would see it.</p>
           <table class="risk"><thead><tr><th>if they…</th><th>you would see</th></tr></thead><tbody>
             <tr><td>skip a day</td><td>the vault balance in <a href="#route">plate 02</a> keeps growing, and nothing new appears in <a href="#ledger">plate 06</a></td></tr>
-            <tr><td>leave fees unclaimed</td><td>they sit in pump.fun's creator vault for the coin, shown on the coin's pump.fun page</td></tr>
+            <tr><td>leave fees unclaimed</td><td>they wait in the launchpad's fee vault on Raydium, which anyone can read on-chain</td></tr>
             <tr><td>send somewhere else</td><td>the recipient address is printed beside every send; a send without a Giving Block receipt is marked "no receipt yet"</td></tr>
           </tbody></table></div></li>
       </ol>
@@ -521,8 +564,8 @@ html.intro #globeCv{visibility:hidden}
     <h2>trade, fee, vault, <em>kitchen.</em></h2>
     <div class="route">
       <div class="flow" aria-hidden="true"><i style="animation-delay:0s"></i><i style="animation-delay:1.75s"></i><i style="animation-delay:3.5s"></i><i style="animation-delay:5.25s"></i></div>
-      <div class="node"><span class="dot">1</span><div class="k">a trade</div><h3>someone buys or sells $WORLD</h3><p>on pump.fun, or anywhere that routes to its pool.</p><div class="v" id="nTrade">no trades yet<small>the coin has not launched</small></div></div>
-      <div class="node"><span class="dot">2</span><div class="k">the creator fee</div><h3>pump.fun takes its cut for the creator</h3><p>0.30% on the curve, 0.05–0.95% on PumpSwap.</p><div class="v"><a href="#calculator">work it out for a trade ↓</a></div></div>
+      <div class="node"><span class="dot">1</span><div class="k">a trade</div><h3>someone buys or sells $WORLD</h3><p>on Raydium, or anywhere that routes to it, Jupiter included.</p><div class="v" id="nTrade">no trades yet<small>the coin has not launched</small></div></div>
+      <div class="node"><span class="dot">2</span><div class="k">the launchpad fee</div><h3>1% of the trade goes to the launchpad</h3><p>$WORLD's own launchpad on Raydium. Raydium keeps 0.25% on top.</p><div class="v"><a href="#calculator">work it out for a trade ↓</a></div></div>
       <div class="node"><span class="dot">3</span><div class="k">the vault</div><h3>the fees collect in one wallet</h3><p>public, read live from Solana.</p><div class="v" id="nVault">opens at launch<small>its address appears here and on our 𝕏 in the same minute</small></div></div>
       <div class="node"><span class="dot">4</span><div class="k">the donation</div><h3>the vault empties into WCK</h3><p>through The Giving Block, WCK's crypto page.</p><div class="v" id="nOut">nothing sent yet<small>the first send will be listed in plate 06</small></div></div>
       <div class="node"><span class="dot">→</span><div class="k">the kitchen</div><h3>a hot meal, somewhere</h3><p>wherever WCK is cooking that week.</p><div class="v"><a href="#world">see the world right now ↓</a></div></div>
@@ -538,22 +581,21 @@ html.intro #globeCv{visibility:hidden}
       <div class="form">
         <label for="cSize">trade size</label>
         <div class="field"><input id="cSize" inputmode="decimal" autocomplete="off" placeholder="1.5"><span>SOL</span></div>
-        <label>where it trades</label>
-        <div class="seg" id="cVenue" role="tablist"><button class="on" data-v="curve" role="tab">on the bonding curve</button><button data-v="swap" role="tab">graduated, on PumpSwap</button></div>
-        <div id="cCapRow" hidden>
-          <label for="cCap">market cap</label>
-          <div class="field"><input id="cCap" inputmode="decimal" autocomplete="off" placeholder="250000"><span>USD</span></div>
-        </div>
         <div class="res">
           <div class="out dim" id="cOut">type a trade size</div>
-          <div class="why" id="cWhy">the fee is worked out exactly from pump.fun's published table.</div>
+          <div class="why" id="cWhy">1% of every trade on the bonding curve goes to the kitchen.</div>
           <div class="shr"><button class="btn" id="cardBtn" type="button" disabled>make a card ↓</button><a class="btn off" id="cardX" href="#" target="_blank" rel="noopener" aria-disabled="true">post on 𝕏 ↗</a></div>
           <div class="share" id="share" hidden><canvas id="cardCv" width="1200" height="675" aria-label="Your trade card"></canvas></div>
         </div>
       </div>
       <div>
-        <div class="tiers" id="tiers"></div>
-        <p class="note" style="margin-top:12px">Creator-fee rates from <a href="https://pump.fun/docs/fees" target="_blank" rel="noopener">pump.fun's fee page ↗</a> (updated 17 October 2026). PumpSwap tiers are set by market cap in SOL; the USD figure you type is converted at the live SOL price. pump.fun can change these rates.</p>
+        <div class="split" id="split">
+          <div class="sk">where the fees on a trade go</div>
+          <div class="srow k1"><span class="lb">the kitchen</span><span class="bar"><i style="--w:80%"></i></span><span class="pc">1%</span><span class="am" id="sKit">—</span></div>
+          <div class="srow k2"><span class="lb">Raydium</span><span class="bar"><i style="--w:20%"></i></span><span class="pc">0.25%</span><span class="am" id="sRay">—</span></div>
+          <div class="srow k3"><span class="lb">for comparison: a pump.fun creator fee</span><span class="bar"><i style="--w:24%"></i></span><span class="pc">0.30%</span><span class="am" id="sPump">—</span></div>
+          <p class="note">The 1% is $WORLD's launchpad fee on Raydium LaunchLab, fixed when the launchpad is created, on every buy and sell until the coin graduates. After that, the kitchen gets the launchpad fee key's share of the pool's trading fees, shown here once the pool exists.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -563,12 +605,24 @@ html.intro #globeCv{visibility:hidden}
   <div class="wrap">
     <div class="eyebrow"><b>04</b> the world right now <span class="st" id="worldSt"><i></i><span>reading GDACS…</span></span></div>
     <h2>where the ground shook, flooded <em>or burned</em> this week.</h2>
+    <div class="wstats" id="wStats" role="group" aria-label="Filter alerts by type"></div>
     <div class="sev" id="sev" hidden><div class="sevk"><i></i>red and orange · last 30 days</div><div class="sevrow" id="sevRow"></div></div>
   </div>
   <div class="map" id="map"><div class="mapin" id="mapIn"><canvas id="mapCv"></canvas><div class="gtip" id="mtip"></div></div></div>
   <div class="wrap">
     <div class="legend"><span><i style="background:var(--red)"></i>red alert</span><span><i style="background:var(--o)"></i>orange alert</span><span><i style="background:var(--g)"></i>green alert</span><span><b class="lg sun"></b>the sun, overhead</span><span><b class="lg dusk"></b>sunrise and sunset</span><span><b class="lg night"></b>night</span><span><b class="lg city"></b>a city at mealtime</span><span class="mono" id="srcLine"></span></div>
-    <div class="chips" id="chips"></div>
+    <div class="w2">
+      <div class="spot" id="spot" hidden>
+        <div class="spk" id="spotK">the most serious alert right now</div>
+        <div class="spg"><canvas id="spotCv" aria-label="A close-up map of the alert"></canvas></div>
+        <div class="spi" id="spotI"></div>
+      </div>
+      <div class="w2r">
+        <div class="tl"><div class="tlk">every alert of the last 30 days, by type</div><div class="tlb"><canvas id="tlCv" aria-label="A timeline of alerts over the last 30 days"></canvas><div class="gtip" id="tltip"></div></div><div class="tlx"><span>30 days ago</span><span>15 days</span><span>today</span></div></div>
+        <div class="ctry"><div class="ck">countries named in the most alerts</div><ol id="ctry"></ol></div>
+      </div>
+    </div>
+    <div class="lhead"><span>every alert</span><span id="lCountTxt"></span></div>
     <ul class="alerts" id="alerts"></ul>
     <div class="empty" id="worldOff" hidden><i></i><span id="worldOffTxt">The alert feed did not answer.</span><button class="btn" id="worldRetry" type="button">retry ↻</button></div>
     <button class="btn more" id="moreBtn" type="button" hidden>show all</button>
@@ -615,6 +669,7 @@ html.intro #globeCv{visibility:hidden}
         <div><div class="k">sends</div><div class="n" id="lCount">0<small>none yet</small></div></div>
         <div><div class="k">fees collected</div><div class="n" id="lIn">—<small>read from Solana</small></div></div>
       </div>
+      <p class="note" id="padWait" hidden></p>
       <table class="ledger"><thead><tr><th>when</th><th>sent</th><th>to</th><th>proof</th></tr></thead><tbody id="lRows"><tr><td colspan="4">No sends yet. The vault's address goes up here and on our 𝕏 at launch, and every send is listed with its transaction.</td></tr></tbody></table>
       <p class="note" id="lNote" style="margin-top:14px"></p>
     </div>
@@ -627,13 +682,12 @@ html.intro #globeCv{visibility:hidden}
     <h2>the obvious <em>questions.</em></h2>
     <div class="faq">
       <details><summary>is this run by World Central Kitchen?</summary><p>No. $WORLD is an independent memecoin. WCK has not endorsed it, is not involved, and owes it nothing. The coin sends money to WCK through the same public crypto donation page anyone can use.</p></details>
-      <details><summary>why not use pump.fun's built-in charity coins?</summary><p>pump.fun's Charity Coins route fees through donate.gg, and World Central Kitchen is not on donate.gg. Rather than pick a charity we didn't want, the vault claims the fees and donates them by hand, and every send is listed here so you can check it.</p></details>
-      <details><summary>how much of every trade goes to the kitchen?</summary><p>The whole creator fee, which pump.fun sets at 0.30% of every trade on the bonding curve and between 0.05% and 0.95% after graduation, depending on market cap. Work out any trade in <a href="#calculator">plate 03</a>. The rest of each trade's fee goes to pump.fun and to the pool, as on every pump.fun coin.</p></details>
+      <details><summary>why Raydium and not pump.fun?</summary><p>On Raydium, $WORLD gets a launchpad of its own, and a launchpad's fee is set by whoever opens it. Ours takes 1% of every trade on the curve, all of it for the kitchen. A pump.fun creator fee on the curve is 0.30%, and pump.fun's charity coins can only pay charities listed on donate.gg, which World Central Kitchen is not.</p></details>
+      <details><summary>how much of every trade goes to the kitchen?</summary><p>1% of every trade on the bonding curve: the launchpad's whole fee. Raydium charges its own 0.25% on top, which goes to Raydium. After graduation, the kitchen gets the launchpad fee key's share of the pool's trading fees. Work out any trade in <a href="#calculator">plate 03</a>.</p></details>
       <details><summary>what stops the dev from keeping the fees?</summary><p>Nothing on-chain does. What you get instead is a public trail: the vault's balance and every send out of it, read live from Solana, with the recipient and a receipt beside each one. If the vault fills and stops emptying, this page shows it before anyone has to say so.</p></details>
       <details><summary>how often does the vault donate?</summary><p id="faqCad">At least once a day, the whole balance minus a few cents of network fees. Small balances may wait until they're worth more than the cost of sending them.</p></details>
       <details><summary>does the team hold a supply or take a cut?</summary><p>No cut of the fees, ever: the rule is all of it. Any tokens the dev buys at launch are bought on the bonding curve like anyone else's, and will be disclosed on our 𝕏 at launch.</p></details>
       <details><summary>what is the world map?</summary><p>Live alerts from GDACS, the disaster alert system run by the UN and the European Commission. It shows where earthquakes, floods, cyclones, wildfires and droughts are happening this week. It does not show where WCK is cooking; WCK publishes that on wck.org.</p></details>
-      <details><summary>is this financial advice?</summary><p>No. $WORLD is a memecoin. Its price can go to zero, and buying it is not a donation: only the creator fees from trading go to the kitchen. If you want to give, give directly.</p></details>
     </div>
   </div>
 </section>
@@ -645,7 +699,7 @@ html.intro #globeCv{visibility:hidden}
 <div class="toast" id="toast" role="status"></div>
 <span class="sr" aria-live="polite" id="live"></span>
 
-<script src="/assets/land.js?v=469240"></script>
-<script src="/assets/app.js?v=469240"></script>
+<script src="/assets/land.js?v=469303"></script>
+<script src="/assets/app.js?v=469303"></script>
 </body>
 </html>

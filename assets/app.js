@@ -143,13 +143,13 @@
     new ResizeObserver(() => { layout(); if (size) frame(performance.now()); }).observe(box);
     const go = () => { layout(); t0 = performance.now(); requestAnimationFrame(loop); ready(); };
     Promise.race([document.fonts.load('600 12px JB'), new Promise(r => setTimeout(r, 1500))]).finally(go);
-    return { hover: null, done, look, drawMarkers, toWorld,
+    return { hover: null, done, look, drawMarkers, toWorld, toView,
       geo: () => ({ size, R, cw, ch, fs, cells }), get lon0() { return lon0; }, get lat0() { return lat0; },
       set: (lo, la) => { lon0 = lo; if (la != null) lat0 = la; }, hold: (v, decode) => { held = v; if (!v) { t0 = performance.now() - (decode ? 0 : 5000); last = 0; } }, frame: () => frame(performance.now()) };
   })();
 
-  // ---------------------------------------------------------------- the intro: dust gathers into the Earth, a day of
-  // sunlight sweeps across it, the live alerts ping, and the globe settles into the page. No words.
+  // ---------------------------------------------------------------- the intro, no words: a night sky, the stars stream in and become the
+  // night side of the Earth with its city lights, the sun rises over the limb, day sweeps across, the sky dawns, the globe settles into the page.
   const INTRO = document.documentElement.classList.contains('intro');
   function introRun() {
     const el = $('#intro'), cv = $('#introCv'), x = cv.getContext('2d'), bar = $('#introBar'), html = document.documentElement;
@@ -157,44 +157,60 @@
     const size = () => { dpr = Math.min(2, devicePixelRatio || 1); vw = innerWidth; vh = innerHeight; cv.width = vw * dpr; cv.height = vh * dpr; };
     size();
     const geo = G.geo(), cells = geo.cells; if (!geo.size || !cells.length) { finish(); return; }
-    const lonEnd = G.lon0, latEnd = G.lat0, lonStart = lonEnd + 210, latStart = latEnd - 22;
-    const parts = cells.map(k => ({ k, sx: hash(k.c * 3 + 1, k.r * 7 + 2) * vw, sy: hash(k.c * 5 + 3, k.r * 11 + 5) * vh, go: 350 + k.d * 780 + k.h * 380 }));
+    const lonEnd = G.lon0, latEnd = G.lat0, lonStart = lonEnd + 150, latStart = latEnd - 18;
+    const parts = cells.map(k => ({ k, sx: hash(k.c * 3 + 1, k.r * 7 + 2) * vw, sy: hash(k.c * 5 + 3, k.r * 11 + 5) * vh, go: 500 + k.d * 820 + k.h * 420, tw: hash(k.c + 17, k.r + 31) }));
     const final = () => { const r = $('#globe').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, k: 1 }; };
-    const big = { x: vw / 2, y: vh / 2, k: clamp(Math.min(vw, vh * 1.05) * .74 / geo.size, .9, 1.9) };
-    const HAND = 3350, HLEN = 1050, END = HAND + HLEN;
+    const big = { x: vw / 2, y: vh / 2, k: clamp(Math.min(vw, vh * 1.05) * .7 / geo.size, .9, 1.85) };
+    const HAND = 4300, HLEN = 1050, END = HAND + HLEN, SWEEP0 = 2050, SWEEP = 1500;
+    // night palette: on an ink sky the same glyphs need lighter inks
+    const DARK = { [C.g]: '#4fd18d', [NIGHT_LAND]: '#2f8f5f', [C.b]: '#7fb2f0', [NIGHT_SEA]: '#5a6b82', [C.o2]: '#ff7f4d', [C.o]: '#ff7a45', [C.red]: '#ff6a5a', [C.ink2]: '#bdb6a8' };
+    const mix = (a, b, p) => { const A = [1, 3, 5].map(i => parseInt(a.substr(i, 2), 16)), B = [1, 3, 5].map(i => parseInt(b.substr(i, 2), 16)); return A.map((v, i) => Math.round(v + (B[i] - v) * p)); };
     const skip = () => { if (ended || skipAt != null) return; const t = performance.now() - T0; if (t < HAND) { skipAt = t; T0 -= (HAND - t); } };
     ['pointerdown', 'wheel', 'keydown', 'touchstart'].forEach(ev => addEventListener(ev, skip, { passive: true, once: true }));
     G.hold(true);
     function frame(now) {
       if (ended) return; const t = now - T0; requestAnimationFrame(frame);
-      const rot = eout(clamp((t - 250) / 2950, 0, 1)); G.set(lerp(lonStart, lonEnd, rot), lerp(latStart, latEnd, rot));
-      const sw = eout(clamp((t - 1100) / 2100, 0, 1)); S.sunT = sw < 1 ? Date.now() - (1 - sw) * 20 * 3600e3 : null; const sun = sunNow();
-      const hp = eio(clamp((t - HAND) / HLEN, 0, 1)), F = hp > 0 ? final() : big, P = { x: lerp(big.x, F.x, hp), y: lerp(big.y, F.y, hp), k: lerp(big.k, F.k, hp) };
+      const rot = eout(clamp((t - 250) / 3750, 0, 1)); G.set(lerp(lonStart, lonEnd, rot), lerp(latStart, latEnd, rot));
+      // the sun comes up: a day of light sweeps the globe, then the sky dawns from ink to paper
+      const sw = clamp((t - SWEEP0) / SWEEP, 0, 1), swe = eio(sw); S.sunT = sw < 1 ? Date.now() - (1 - swe) * 13 * 3600e3 : null; const sun = sunNow();
+      const dawn = eio(clamp((t - SWEEP0 - 500) / 750, 0, 1)), dk = dawn < .5;
+      const hp = eio(clamp((t - HAND) / HLEN, 0, 1)), F = hp > 0 ? final() : big, zoom = lerp(.9, 1, eout(clamp(t / 2600, 0, 1))), P = { x: lerp(big.x, F.x, hp), y: lerp(big.y, F.y, hp), k: lerp(big.k * zoom, F.k, hp) };
       if (hp > 0 && !handed) { handed = true; html.classList.remove('intro'); $('.hero').classList.add('go'); if (vw < 700) { released = true; G.hold(false, true); } }
-      const am = released ? 1 - hp : 1;
+      const am = released ? 1 - hp : 1, ink = c => dk ? (DARK[c] || c) : c;
       const T = (gx, gy) => [P.x + (gx - geo.size / 2) * P.k, P.y + (gy - geo.size / 2) * P.k]; T.k = P.k;
-      x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, vw, vh); el.style.backgroundColor = `rgba(246,243,236,${1 - hp})`;
-      x.textBaseline = 'alphabetic'; const fA = `600 ${geo.fs * P.k}px JB, ui-monospace, monospace`; const fade = clamp(t / 380, 0, 1);
-      // an orbit around the forming Earth: dots on a tilted ring and one orange satellite (back half first, front half after)
-      const ra = clamp((t - 1200) / 700, 0, 1) * (1 - clamp((t - HAND + 200) / 500, 0, 1)), rr = geo.R * 1.3 * P.k, tilt = -.32, ph = t / 2600;
+      const sky = mix('#151513', '#f6f3ec', dawn);
+      x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, vw, vh); el.style.backgroundColor = `rgba(${sky[0]},${sky[1]},${sky[2]},${1 - hp})`;
+      x.textBaseline = 'alphabetic'; const fA = `600 ${geo.fs * P.k}px JB, ui-monospace, monospace`; const fade = clamp(t / 500, 0, 1);
+      // the orbit ring and its satellite: back half behind the Earth, front half over it
+      const ra = clamp((t - 1300) / 700, 0, 1) * (1 - clamp((t - HAND + 200) / 500, 0, 1)), rr = geo.R * 1.32 * P.k, tilt = -.32, ph = t / 2600;
       const ring = front => { if (ra <= 0) return; x.font = `600 ${geo.fs * P.k * 1.1}px JB, ui-monospace, monospace`; for (let i = 0; i < 120; i++) { const a = i / 120 * 6.283 + ph, sz = Math.sin(a); if ((sz > 0) !== front) continue;
-          const ex = Math.cos(a) * rr, ey = sz * rr * .24, X = P.x + ex * Math.cos(tilt) - ey * Math.sin(tilt), Y = P.y + ex * Math.sin(tilt) + ey * Math.cos(tilt); x.globalAlpha = ra * (front ? .75 : .22); x.fillStyle = C.b; x.fillText(i % 6 ? '.' : ':', X, Y); }
+          const ex = Math.cos(a) * rr, ey = sz * rr * .24, X = P.x + ex * Math.cos(tilt) - ey * Math.sin(tilt), Y = P.y + ex * Math.sin(tilt) + ey * Math.cos(tilt); x.globalAlpha = ra * (front ? .75 : .22) * am; x.fillStyle = ink(C.b); x.fillText(i % 6 ? '.' : ':', X, Y); }
         const a = ph * 2.4 * 6.283, sz = Math.sin(a); if ((sz > 0) === front) { const ex = Math.cos(a) * rr, ey = sz * rr * .24, X = P.x + ex * Math.cos(tilt) - ey * Math.sin(tilt), Y = P.y + ex * Math.sin(tilt) + ey * Math.cos(tilt);
-          x.globalAlpha = ra * (front ? 1 : .35); x.fillStyle = C.o; x.beginPath(); x.arc(X, Y - geo.fs * P.k * .3, 3.6 * P.k, 0, 6.283); x.fill(); } };
-      ring(false); x.font = fA;
-      for (const p of parts) { const k = p.k, [tx, ty] = T(k.gx, k.gy), fp = clamp((t - p.go) / 720, 0, 1);
-        if (fp < 1) { const e = eio(fp), px = lerp(p.sx + Math.sin(t / 700 + k.h * 9) * 9, tx, e), py = lerp(p.sy + Math.cos(t / 800 + k.h * 7) * 9, ty, e), sc = lerp(1.7, 1, e);
-          x.globalAlpha = (.34 + .5 * e) * fade; x.fillStyle = k.h > .86 ? C.o : k.h > .45 ? C.b : C.g; if (sc !== 1) x.font = `600 ${geo.fs * P.k * sc}px JB, ui-monospace, monospace`;
-          x.fillText(DUST[Math.floor(hash(k.c, k.r + Math.floor(t / 60)) * 14)], px, py); if (sc !== 1) x.font = fA; continue; }
-        const L = G.look(k, sun); if (!L) continue; const fl = t - p.go - 720;
+          x.globalAlpha = ra * (front ? 1 : .35) * am; x.fillStyle = C.o; x.beginPath(); x.arc(X, Y - geo.fs * P.k * .3, 3.6 * P.k, 0, 6.283); x.fill(); } };
+      ring(false);
+      // the sun itself, rising over the limb in its real direction
+      { const [sx, sy, sz] = G.toView(sun.lat, sun.lon), n = Math.hypot(sx, sy) || 1, sa = clamp((sz + .35) / .35, 0, 1) * clamp(1 - (t - HAND + 300) / 600, 0, 1) * clamp((t - SWEEP0 + 300) / 500, 0, 1);
+        if (sa > 0) { const R = geo.R * P.k, d = R * (1.16 + .18 * clamp(sz + .3, 0, 1)), X = P.x + sx / n * d, Y = P.y - sy / n * d, rad = 9 * P.k + 4;
+          x.globalAlpha = sa * .9; x.fillStyle = C.o; x.beginPath(); x.arc(X, Y, rad, 0, 6.283); x.fill();
+          x.font = `800 ${geo.fs * P.k * 1.2}px JB, ui-monospace, monospace`; x.textAlign = 'center';
+          for (let i = 0; i < 16; i++) { const a = i / 16 * 6.283 + t / 1800, rr2 = rad + 8 + ((t / 260 + i) % 3) * 5; x.globalAlpha = sa * (.35 + .4 * ((i + Math.floor(t / 120)) % 2)); x.fillText(i % 2 ? '*' : '+', X + Math.cos(a) * rr2, Y + Math.sin(a) * rr2 + 4); } x.textAlign = 'left'; } }
+      x.font = fA;
+      for (const p of parts) { const k = p.k, [tx, ty] = T(k.gx, k.gy), fp = clamp((t - p.go) / 760, 0, 1);
+        if (fp < 1) { const e = eio(fp), px = lerp(p.sx + Math.sin(t / 900 + k.h * 9) * 5, tx, e), py = lerp(p.sy + Math.cos(t / 1000 + k.h * 7) * 5, ty, e);
+          if (e < .02) { const tw = .25 + .75 * Math.abs(Math.sin(t / (300 + p.tw * 500) + p.tw * 20)); x.globalAlpha = tw * fade * (p.tw > .9 ? .95 : .55); x.fillStyle = p.tw > .93 ? '#ffd2bf' : '#e9e4d8'; x.fillText(p.tw > .9 ? '*' : p.tw > .6 ? '+' : '.', px, py); continue; }
+          x.globalAlpha = (.4 + .5 * e) * fade; x.fillStyle = ink(k.h > .86 ? C.o : k.h > .45 ? C.b : C.g); x.fillText(DUST[Math.floor(hash(k.c, k.r + Math.floor(t / 60)) * 14)], px, py); continue; }
+        const L = G.look(k, sun); if (!L) continue; const fl = t - p.go - 760;
         if (fl < 240) { x.globalAlpha = (1 - fl / 480) * am; x.fillStyle = C.o; x.fillText(L[0] === '.' ? ':' : L[0], tx, ty); continue; }
-        x.globalAlpha = L[2] * am; x.fillStyle = L[1]; x.fillText(L[0], tx, ty); }
+        x.globalAlpha = L[2] * am * (dk ? 1.15 : 1); x.fillStyle = ink(L[1]); x.fillText(L[0], tx, ty); }
+      // city lights: the 48 tape cities glow on the night side until the sun reaches them
+      if (t > 1500) { const ca = clamp((t - 1500) / 500, 0, 1) * (1 - hp); for (const m of MEALS) { const [vx, vy, vz] = G.toView(m.lat, m.lon); if (vz < .1 || sunAlt(m.lat, m.lon, sun) > -.02) continue;
+          const [X, Y] = T(geo.size / 2 + vx * geo.R, geo.size / 2 - vy * geo.R), tw = .6 + .4 * Math.sin(t / 240 + m.lat); x.globalAlpha = ca * tw * am; x.fillStyle = '#ffb27a'; x.beginPath(); x.arc(X, Y, 1.9 * P.k + .6, 0, 6.283); x.fill(); x.globalAlpha = ca * tw * .25 * am; x.beginPath(); x.arc(X, Y, 5 * P.k, 0, 6.283); x.fill(); } }
       ring(true);
-      if (t > 2600) { const sorted = S.events; G.drawMarkers(x, now, T, (i, e) => clamp((t - 2600 - (LW[e.level] > 1 ? 0 : 260) - i * 9) / 260, 0, 1) * am); }
+      if (t > 3300) G.drawMarkers(x, now, T, (i, e) => clamp((t - 3300 - (LW[e.level] > 1 ? 0 : 220) - i * 8) / 260, 0, 1) * am);
       x.globalAlpha = 1; bar.style.width = (clamp(t / END, 0, 1) * 100) + '%'; bar.style.opacity = 1 - hp;
       if (t >= END) finish(); }
     function finish() { if (ended) return; ended = true; S.sunT = null; html.classList.remove('intro'); $('.hero').classList.add('go'); if (!released) { G.hold(false); G.frame(); } if (el) el.remove(); }
-    setTimeout(finish, 9000); requestAnimationFrame(frame);
+    setTimeout(finish, 11000); requestAnimationFrame(frame);
     addEventListener('resize', () => { if (!ended) finish(); }, { once: true });
   }
 
